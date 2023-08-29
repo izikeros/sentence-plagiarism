@@ -1,14 +1,18 @@
 [tool.poetry]
 name = "sentence-plagiarism"
-version = "0.1.0"
+version = "0.2.0"
 description = "Compare sentences from input document with all sentences from reference documents - find very similar ones."
-authors = ["Krystian Safjan"]
+authors = ["Krystian Safjan <ksafjan@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 
+keywords = ["plagiarism", "plagiarism-detection","text-similarity","sentence_similarity","sentence-plagiarism"]
+homepage = "https://github.com/izikeros/sentence-plagiarism"
+repository = "https://github.com/izikeros/sentence-plagiarism"
+documentation = "https://github.com/izikeros/sentence-plagiarism"
+
 [tool.poetry.dependencies]
 python = "^3.9"
-
 
 [tool.poetry.scripts]
 sentence-plagiarism = 'sentence_plagiarism.cli:main'
