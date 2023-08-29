@@ -1,5 +1,9 @@
 # Plagiarism Checker
 
+![img](https://img.shields.io/pypi/v/sentence-plagiarism.svg)
+![](https://img.shields.io/pypi/pyversions/sentence-plagiarism.svg)
+![](https://img.shields.io/pypi/dm/sentence-plagiarism.svg)
+
 This is a command-line tool for checking the similarity between a given text and a set of reference documents. The tool uses the Jaccard similarity algorithm to compare the input text with the reference documents.
 
 ## Installation
@@ -67,4 +71,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 Krystian Safjan - ksafjan@gmail.com
 
-Project Link: [https://github.com/izikeros/plagiarism-checker](https://github.com/izikeros/plagiarism-checker)
+Project Link: [https://github.com/izikeros/sentence-plagiarism](https://github.com/izikeros/sentence-plagiarism)
