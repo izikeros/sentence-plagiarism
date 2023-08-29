@@ -1,0 +1,6 @@
+We value the vibrant Python community, and that’s why we proudly offer the PyCharm Community Edition for free, as our open-source contribution to support the Python ecosystem.
+generation of specific downstream tasks
+
+Closing thoughts
+
+DataSpell integrates with Jupyter Notebook to combine the interactive nature of Jupyter Notebook with the benefits of the most intelligent Python IDE. In addition to the built-in Python coding assistance, you can also install a plugin that adds the R support.

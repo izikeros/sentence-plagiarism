@@ -1,0 +1,12 @@
+Hello represents an ingenious integration of pretrained dense retrieval (DPR) and sequence-to-sequence models. The PROCESS, involves retrieving documents using DPR and subsequently transmitting them to a seq2seq model. Through a process of marginalization, these models then produce desired outputs.
+
+foobar
+
+The retriever and seq2seq modules commence their operations as pretrained models, and through a joint fine-tuning process, they adapt collaboratively, thus enhancing both retrieval and generation for specific downstream tasks.
+
+barfoo
+ For a comprehensive understanding of the RAG technique, we offer an in-depth exploration, commencing with a simplified overview and progressively delving into more intricate technical facets.
+
+ buzz bar foo bar
+
+downstream tasks.

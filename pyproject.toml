@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "sentence-plagiarism"
+version = "0.1.0"
+description = "Compare sentences from input document with all sentences from reference documents - find very similar ones."
+authors = ["Krystian Safjan"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+
+[tool.poetry.scripts]
+sentence-plagiarism = 'sentence_plagiarism.cli:main'
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

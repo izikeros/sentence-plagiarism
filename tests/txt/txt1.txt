@@ -1,0 +1,5 @@
+Retrieval-Augmented Generation, commonly referred to as RAG, represents an ingenious integration of pretrained dense retrieval (DPR) and sequence-to-sequence models. The process involves retrieving documents using DPR and subsequently transmitting them to a seq2seq model. Through a process of marginalization, these models then produce desired outputs. The retriever and seq2seq modules commence their operations as pretrained models, and through a joint fine-tuning process, they adapt collaboratively, thus enhancing both retrieval and generation for specific downstream tasks. This innovative artificial intelligence framework serves as a means to empower large language models (LLMs) by anchoring them to external knowledge sources. Consequently, this strategic approach ensures the availability of accurate, current information, thereby granting users valuable insights into the generative mechanisms of these models.
+
+Closing thoughts
+
+For a comprehensive understanding of the RAG technique, we offer an in-depth exploration, commencing with a simplified overview and progressively delving into more intricate technical facets.
