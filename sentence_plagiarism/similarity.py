@@ -17,6 +17,7 @@ def sorensen_dice_similarity(set1, set2):
     intersection = len(set1 & set2)
     return 2 * intersection / (len(set1) + len(set2))
 
+
 def overlap_similarity(set1, set2):
     """Compute the overlap similarity between two sets"""
     intersection = len(set1 & set2)
@@ -52,7 +53,10 @@ def _jaro_similarity(s1, s2):
     if m == 0:
         return 0.0
 
-    transpositions = sum(c1 != c2 for c1, c2 in zip(common_chars_s1, common_chars_s2)) // 2
+    transpositions = (
+        sum(c1 != c2 for c1, c2 in zip(common_chars_s1, common_chars_s2, strict=False))
+        // 2
+    )
     jaro_similarity = (m / len_s1 + m / len_s2 + (m - transpositions) / m) / 3
     return jaro_similarity
 
@@ -61,7 +65,7 @@ def jaro_winkler_similarity(s1, s2, p=0.1):
     jaro_sim = _jaro_similarity(s1, s2)
     common_prefix_len = 0
 
-    for i, (c1, c2) in enumerate(zip(s1, s2)):
+    for _, (c1, c2) in enumerate(zip(s1, s2, strict=False)):
         if c1 == c2:
             common_prefix_len += 1
         else:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare sentences from input document with all sentences from reference documents - find very similar ones."""
+"""Compare sentences from an input document with all sentences from reference documents - find very similar ones."""
 import json
 import re
 from collections import defaultdict
@@ -20,9 +20,6 @@ def _split_texts_to_sentences(input_doc, reference_docs):
         ref_sents = _text_to_sentences(ref_content.replace("\n", " ").strip())
         ref_doc_sents[ref_doc].extend(ref_sents)
     return input_sents, ref_doc_sents
-
-
-
 
 
 def _cross_check_sentences(
@@ -54,12 +51,12 @@ def _display_similar_sentence(similarity_dict):
 
 
 def _get_all_files_content(examined_file, reference_files):
-    with open(examined_file, "r", encoding="utf-8") as f:
+    with open(examined_file, encoding="utf-8") as f:
         input_text_content = f.read().replace("\n", " ").strip()
 
     reference_docs = {}
     for ref_doc in reference_files:
-        with open(ref_doc, "r", encoding="utf-8") as f:
+        with open(ref_doc, encoding="utf-8") as f:
             reference_docs[ref_doc] = f.read().replace("\n", " ").strip()
     return input_text_content, reference_docs
 
@@ -73,7 +70,9 @@ def check(
 
     input_sents, ref_doc_sents = _split_texts_to_sentences(input_doc, reference_docs)
 
-    _cross_check_sentences(input_sents, ref_doc_sents, results, similarity_threshold, quiet)
+    _cross_check_sentences(
+        input_sents, ref_doc_sents, results, similarity_threshold, quiet
+    )
 
     if output_file:
         with open(output_file, "w") as f:
