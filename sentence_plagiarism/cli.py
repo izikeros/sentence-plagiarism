@@ -24,6 +24,22 @@ def get_inputs():
     parser.add_argument(
         "--min_length", type=int, default=10, help="Minimum sentence length to compare"
     )
+    # add similarity metric selection
+    parser.add_argument(
+        "--similarity_metric",
+        type=str,
+        default="jaccard_similarity",
+        choices=[
+            "jaccard_similarity",
+            "cosine_similarity",
+            "sorensen_dice_similarity",
+            "overlap_similarity",
+            "tversky_similarity",
+            "jaro_similarity",
+            "jaro_winkler_similarity",
+        ],
+        help="Similarity metric to use for comparison (default: jaccard_similarity)",
+    )
     args = parser.parse_args()
     in_text = args.input_text
     ref_docs = args.reference_documents
