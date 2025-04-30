@@ -12,7 +12,7 @@ repository = "https://github.com/izikeros/sentence-plagiarism"
 documentation = "https://github.com/izikeros/sentence-plagiarism"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.9"
 
 [tool.poetry.scripts]
 sentence-plagiarism = 'sentence_plagiarism.cli:main'
