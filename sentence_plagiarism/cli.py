@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from sentence_plagiarism.plagiarism_checker import check
 
@@ -24,15 +25,40 @@ def get_inputs():
     parser.add_argument(
         "--min_length", type=int, default=10, help="Minimum sentence length to compare"
     )
-    args = parser.parse_args()
-    in_text = args.input_text
-    ref_docs = args.reference_documents
-    threshold = args.threshold
-    out_file = args.output_file
-    quiet = args.quiet
-    return in_text, ref_docs, threshold, out_file, quiet
+    # add similarity metric selection
+    parser.add_argument(
+        "--similarity_metric",
+        type=str,
+        default="jaccard_similarity",
+        choices=[
+            "jaccard_similarity",
+            "cosine_similarity",
+            "sorensen_dice_similarity",
+            "overlap_similarity",
+            "tversky_similarity",
+            "jaro_similarity",
+            "jaro_winkler_similarity",
+        ],
+        help="Similarity metric to use for comparison (default: jaccard_similarity)",
+    )
+    return parser.parse_args()
 
 
 def main():
-    in_text, ref_docs, threshold, output, quiet = get_inputs()
-    check(in_text, ref_docs, threshold, output, quiet)
+    args = get_inputs()
+    try:
+        check(
+            examined_file=args.input_file,
+            reference_files=args.reference_files,
+            similarity_threshold=args.threshold,
+            output_file=args.output,
+            quiet=args.quiet,
+            min_length=args.min_length,
+            similarity_metric=args.metric,
+        )
+    except FileNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return 1
+    except Exception as e:
+        print(f"Unexpected error: {e}", file=sys.stderr)
+        return 1

@@ -5,8 +5,6 @@ import re
 from collections import defaultdict
 from itertools import product
 
-from sentence_plagiarism.similarity import jaccard_similarity
-
 
 def _text_to_sentences(text):
     """Split the text into sentences using regex"""
@@ -27,13 +25,30 @@ def _split_texts_to_sentences(input_doc, reference_docs, min_length):
 
 
 def _cross_check_sentences(
-    input_sents, ref_doc_sents, results, similarity_threshold, quiet
+    input_sents,
+    ref_doc_sents,
+    results,
+    similarity_threshold,
+    quiet,
+    similarity_metric="jaccard_similarity",
 ):
+    from sentence_plagiarism.similarity import (  # noqa
+        cosine_similarity,
+        jaccard_similarity,
+        jaro_similarity,
+        jaro_winkler_similarity,
+        overlap_similarity,
+        sorensen_dice_similarity,
+        tversky_similarity,
+    )
+
+    metric_function = locals()[similarity_metric]
+
     for input_sent, (ref_doc, ref_sents) in product(input_sents, ref_doc_sents.items()):
         input_tokens = set(re.findall(r"\b\w+\b", input_sent.lower()))
         for ref_sent in ref_sents:
             ref_tokens = set(re.findall(r"\b\w+\b", ref_sent.lower()))
-            similarity_score = jaccard_similarity(input_tokens, ref_tokens)
+            similarity_score = metric_function(input_tokens, ref_tokens)
             if similarity_score > similarity_threshold:
                 similarity = {
                     "input_sentence": input_sent,
@@ -72,6 +87,7 @@ def check(
     output_file=None,
     quiet=False,
     min_length=10,
+    similarity_metric="jaccard_similarity",
 ):
     # placeholder for the list of dictionaries
     results = []
@@ -82,7 +98,12 @@ def check(
     )
 
     _cross_check_sentences(
-        input_sents, ref_doc_sents, results, similarity_threshold, quiet
+        input_sents,
+        ref_doc_sents,
+        results,
+        similarity_threshold,
+        quiet,
+        similarity_metric,
     )
 
     if output_file:
