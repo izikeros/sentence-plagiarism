@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare sentences from input document with all sentences from reference documents - find very similar ones."""
+"""Compare sentences from an input document with all sentences from reference documents - find very similar ones."""
 import json
 import re
 from collections import defaultdict
@@ -13,16 +13,17 @@ def _text_to_sentences(text):
     return re.split(r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s", text)
 
 
-def _split_texts_to_sentences(input_doc, reference_docs):
-    input_sents = _text_to_sentences(input_doc)
+def _split_texts_to_sentences(input_doc, reference_docs, min_length):
+    input_sents = [s for s in _text_to_sentences(input_doc) if len(s) >= min_length]
     ref_doc_sents = defaultdict(list)
     for ref_doc, ref_content in reference_docs.items():
-        ref_sents = _text_to_sentences(ref_content.replace("\n", " ").strip())
+        ref_sents = [
+            s
+            for s in _text_to_sentences(ref_content.replace("\n", " ").strip())
+            if len(s) >= min_length
+        ]
         ref_doc_sents[ref_doc].extend(ref_sents)
     return input_sents, ref_doc_sents
-
-
-
 
 
 def _cross_check_sentences(
@@ -54,26 +55,35 @@ def _display_similar_sentence(similarity_dict):
 
 
 def _get_all_files_content(examined_file, reference_files):
-    with open(examined_file, "r", encoding="utf-8") as f:
+    with open(examined_file, encoding="utf-8") as f:
         input_text_content = f.read().replace("\n", " ").strip()
 
     reference_docs = {}
     for ref_doc in reference_files:
-        with open(ref_doc, "r", encoding="utf-8") as f:
+        with open(ref_doc, encoding="utf-8") as f:
             reference_docs[ref_doc] = f.read().replace("\n", " ").strip()
     return input_text_content, reference_docs
 
 
 def check(
-    examined_file, reference_files, similarity_threshold, output_file=None, quiet=False
+    examined_file,
+    reference_files,
+    similarity_threshold,
+    output_file=None,
+    quiet=False,
+    min_length=10,
 ):
     # placeholder for the list of dictionaries
     results = []
     input_doc, reference_docs = _get_all_files_content(examined_file, reference_files)
 
-    input_sents, ref_doc_sents = _split_texts_to_sentences(input_doc, reference_docs)
+    input_sents, ref_doc_sents = _split_texts_to_sentences(
+        input_doc, reference_docs, min_length
+    )
 
-    _cross_check_sentences(input_sents, ref_doc_sents, results, similarity_threshold, quiet)
+    _cross_check_sentences(
+        input_sents, ref_doc_sents, results, similarity_threshold, quiet
+    )
 
     if output_file:
         with open(output_file, "w") as f:

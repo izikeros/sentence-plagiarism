@@ -20,6 +20,10 @@ def get_inputs():
     parser.add_argument(
         "--quiet", action="store_true", help="Suppress output to console"
     )
+    # add minimum sentence length filter
+    parser.add_argument(
+        "--min_length", type=int, default=10, help="Minimum sentence length to compare"
+    )
     args = parser.parse_args()
     in_text = args.input_text
     ref_docs = args.reference_documents
