@@ -1,5 +1,5 @@
 We value the vibrant Python community, and that’s why we proudly offer the PyCharm Community Edition for free, as our open-source contribution to support the Python ecosystem.
-generation of specific downstream tasks
+generation of specific downstream tasks. Keep calm and code on!
 
 Closing thoughts
 

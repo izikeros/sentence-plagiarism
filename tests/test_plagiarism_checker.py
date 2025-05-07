@@ -83,9 +83,21 @@ class TestSplitTextsToSentences:
         assert input_sents[1] == ("Another test sentence with similarity.", 25, 63)
         assert len(ref_doc_sents) == 2
 
-        assert ref_doc_sents["doc1.txt"][0] == ("This is a test sentence with words.", 0, 36)
-        assert ref_doc_sents["doc1.txt"][1] == ("Something completely different.", 36, 67)
-        assert ref_doc_sents["doc2.txt"][0] == ("Another test sentence with similarity and more words.", 0, 53)
+        assert ref_doc_sents["doc1.txt"][0] == (
+            "This is a test sentence with words.",
+            0,
+            36,
+        )
+        assert ref_doc_sents["doc1.txt"][1] == (
+            "Something completely different.",
+            36,
+            67,
+        )
+        assert ref_doc_sents["doc2.txt"][0] == (
+            "Another test sentence with similarity and more words.",
+            0,
+            53,
+        )
 
     def test_min_length_filter(self, sample_texts):
         """Test that sentences shorter than min_length are filtered out."""
@@ -114,9 +126,9 @@ class TestCrossCheckSentences:
                 input_sents, ref_doc_sents, results, similarity_threshold, quiet=False
             )
 
-        assert len(results) >= 2  # At least 2 matches with threshold 0.5
+        assert len(results) >= 2  # At least 2 matches with a threshold 0.5
 
-        # Check if structure is correct
+        # Check if the structure is correct
         assert all(
             key in results[0]
             for key in [
