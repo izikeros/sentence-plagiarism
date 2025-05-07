@@ -9,7 +9,9 @@ from itertools import product
 def _text_to_sentences(text):
     """Split the text into sentences and track their positions."""
     sentences = []
-    pattern = r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?)\s"
+    # The regex pattern splits text into sentences by identifying sentence-ending punctuation ('.', '?' or '!')
+    # followed by whitespace. It avoids splitting on abbreviations (e.g., "e.g.", "Dr.") or initials (e.g., "A.B.").
+    pattern = r"(?<!\w\.\w.)(?<![A-Z][a-z]\.)(?<=\.|\?|!)\s"
 
     # Find all split positions
     split_positions = [m.start() + 1 for m in re.finditer(pattern, text)]
