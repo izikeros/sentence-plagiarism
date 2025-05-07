@@ -60,6 +60,15 @@ def _cross_check_sentences(
     quiet,
     similarity_metric="jaccard_similarity",
 ):
+    from sentence_plagiarism.similarity import (  # noqa
+        cosine_similarity,
+        jaccard_similarity,
+        jaro_similarity,
+        jaro_winkler_similarity,
+        overlap_similarity,
+        sorensen_dice_similarity,
+        tversky_similarity,
+    )
 
     metric_function = locals()[similarity_metric]
 
