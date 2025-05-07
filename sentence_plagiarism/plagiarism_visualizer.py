@@ -130,59 +130,71 @@ def generate_document_colors(
 
 
 def split_text_into_segments(
-    content: str, matches: list[PlagiarismMatch]
-) -> list[SegmentType]:
-    """
-    Split the document into segments, identifying which parts are plagiarized.
-    Handles overlapping segments properly.
-    """
-    # Create a list of all start and end positions
-    positions = []
-    for match in matches:
-        positions.append((match.input_start_pos, "start", match))
-        positions.append((match.input_end_pos, "end", match))
+        content: str, matches: list[PlagiarismMatch]
+    ) -> list[SegmentType]:
+        """
+        Split the document into segments, identifying which parts are plagiarized.
+        Handles overlapping segments properly.
+        """
+        # Create a list of all start and end positions
+        positions = []
+        for match in matches:
+            positions.append((match.input_start_pos, "start", match))
+            positions.append((match.input_end_pos, "end", match))
 
-    # Sort positions by their location and then by type (end comes before start)
-    positions.sort(key=lambda x: (x[0], 0 if x[1] == "end" else 1))
+        # Sort positions by their location and then by type (end comes before start)
+        positions.sort(key=lambda x: (x[0], 0 if x[1] == "end" else 1))
 
-    segments = []
-    current_pos = 0
-    active_matches = set()
+        segments = []
+        current_pos = 0
+        active_matches = set()
 
-    for pos, pos_type, match in positions:
-        # Add segment from current position to this new position
-        if pos > current_pos:
-            segment_text = content[current_pos:pos]
+        # Handle the case where there's text before the first position
+        if positions and positions[0][0] > 0:
+            segments.append(
+                SegmentType(
+                    start=0,
+                    end=positions[0][0],
+                    text=content[0:positions[0][0]],
+                    matches=[],
+                )
+            )
+            current_pos = positions[0][0]
+
+        for pos, pos_type, match in positions:
+            # Add segment from current position to this new position
+            if pos > current_pos:
+                segment_text = content[current_pos:pos]
+                segments.append(
+                    SegmentType(
+                        start=current_pos,
+                        end=pos,
+                        text=segment_text,
+                        matches=list(active_matches),
+                    )
+                )
+
+            # Update active matches
+            if pos_type == "start":
+                active_matches.add(match)
+            elif pos_type == "end":
+                if match in active_matches:
+                    active_matches.remove(match)
+
+            current_pos = pos
+
+        # Add the final segment if there's content left
+        if current_pos < len(content):
             segments.append(
                 SegmentType(
                     start=current_pos,
-                    end=pos,
-                    text=segment_text,
-                    matches=list(active_matches),
+                    end=len(content),
+                    text=content[current_pos:],
+                    matches=[],
                 )
             )
 
-        # Update active matches
-        if pos_type == "start":
-            active_matches.add(match)
-        elif pos_type == "end":
-            if match in active_matches:
-                active_matches.remove(match)
-
-        current_pos = pos
-
-    # Add the final segment if there's content left
-    if current_pos < len(content):
-        segments.append(
-            SegmentType(
-                start=current_pos,
-                end=len(content),
-                text=content[current_pos:],
-                matches=[],
-            )
-        )
-
-    return segments
+        return segments
 
 
 def create_html_with_highlights(

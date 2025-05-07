@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.1] - 2025-05-07
+
+### 🐛 Bug Fixes
+
+- Improve segment splitting logic in plagiarism visualizer
+
+### ⚙️ Miscellaneous Tasks
+
+- Add changelog
+- Bump version to 0.7.1
+
 ## [0.7.0] - 2025-05-07
 
 ### 🚀 Features
