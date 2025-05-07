@@ -126,9 +126,9 @@ class TestCrossCheckSentences:
                 input_sents, ref_doc_sents, results, similarity_threshold, quiet=False
             )
 
-        assert len(results) >= 2  # At least 2 matches with threshold 0.5
+        assert len(results) >= 2  # At least 2 matches with a threshold 0.5
 
-        # Check if structure is correct
+        # Check if the structure is correct
         assert all(
             key in results[0]
             for key in [
