@@ -15,7 +15,7 @@ A command-line tool for detecting sentence-level plagiarism using the Jaccard si
 - Detects sentence-level plagiarism using Jaccard similarity.
 - Configurable similarity threshold.
 - Filters sentences by minimum length.
-- Outputs results in JSON format.
+- Outputs results in text and JSON format.
 - Quiet mode to suppress console output.
 
 ## Supported Similarity Metrics
@@ -42,30 +42,34 @@ sentence-plagiarism <path-to-input-file> <path-to-reference-file-1> ... [--thres
 ```
 
 ### Arguments
-- `<path-to-input-file>`: Path to the input file to be checked for plagiarism.
-- `<path-to-reference-file-1> ...`: Paths to the reference files to compare against.
-- `--threshold`: (optional) Minimum similarity score (0-1) to consider a sentence plagiarized. Default: 0.8.
-- `--output_file`: (optional) Path to save results in JSON format. Default: `results.json`.
-- `--quiet`: (optional) Suppress console output.
-- `--min_length`: (optional) Minimum sentence length (in characters) to include in the comparison. Default: 0.
-- `--metric`: {jaccard_similarity,cosine_similarity,jaro_similarity,jaro_winkler_similarity,overlap_similarity,sorensen_dice_similarity,tversky_similarity}: Similarity metric to use
+- `<input_file>`: Path to the input file to be checked for plagiarism.
+- `<reference_files>`: Paths to one or more reference files to compare against.
+- `--threshold`, `-t`: (optional) Minimum similarity score (0-1) to consider a sentence plagiarized. Default: 0.8.
+- `--output`, `-o`: (optional) Path to save results in JSON format. Default: `results.json`.
+- `--text_output`, `-to`: (optional) Path to save results in text format.
+- `--quiet`, `-q`: (optional) Suppress console output.
+- `--min_length`, `-ml`: (optional) Minimum sentence length to include in the comparison. Default: 10.
+- `--metric`, `-m`: (optional) Similarity metric to use for comparison. Options: jaccard_similarity, cosine_similarity, sorensen_dice_similarity, overlap_similarity, tversky_similarity, jaro_similarity, jaro_winkler_similarity. Default: jaccard_similarity.
 
 ### Example
 ```sh
-sentence-plagiarism input.txt ref1.txt ref2.txt --threshold 0.8 --output_file results.json --min_length 50
+sentence-plagiarism input.txt ref1.txt ref2.txt --threshold 0.8 --output results.json --min_length 10 --metric jaccard_similarity
 ```
 
 ## Programmatic Usage
 ```python
 from sentence_plagiarism import check
 
+# Basic usage
 check(
-    examined_file="txt/txt1.txt",
-    reference_files=["txt/txt2.txt", "txt/txt3.txt"],
+    examined_file="input.txt",
+    reference_files=["ref1.txt", "ref2.txt"],
     similarity_threshold=0.8,
-    output_file=None,
+    output_file="results.json",
+    text_output_file="results.txt",
     quiet=False,
-    min_length=50,
+    min_length=10,
+    similarity_metric="jaccard_similarity"
 )
 ```
 
