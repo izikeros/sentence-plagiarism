@@ -6,28 +6,35 @@ from sentence_plagiarism.plagiarism_checker import check
 
 def get_inputs():
     parser = argparse.ArgumentParser(description="Plagiarism Detection Tool")
-    parser.add_argument("input_text", help="Path to the input text file")
+    parser.add_argument("input_file", help="Path to the input text file")
     parser.add_argument(
-        "reference_documents", nargs="+", help="Paths to reference documents"
+        "reference_files", nargs="+", help="Paths to reference documents"
     )
     parser.add_argument(
-        "--threshold", type=float, default=0.8, help="Similarity threshold"
+        "--threshold", "-t", type=float, default=0.8, help="Similarity threshold"
     )
     # output file to save results as JSON
     parser.add_argument(
-        "--output_file", type=str, default="results.json", help="Output file name"
+        "--output", "-o", type=str, default="results.json", help="JSON output file name"
     )
+    # text output file option
+    parser.add_argument("--text_output", "-to", type=str, help="Text output file name")
     # add quiet mode to suppress output
     parser.add_argument(
-        "--quiet", action="store_true", help="Suppress output to console"
+        "--quiet", "-q", action="store_true", help="Suppress output to console"
     )
     # add minimum sentence length filter
     parser.add_argument(
-        "--min_length", type=int, default=10, help="Minimum sentence length to compare"
+        "--min_length",
+        "-ml",
+        type=int,
+        default=10,
+        help="Minimum sentence length to compare",
     )
     # add similarity metric selection
     parser.add_argument(
-        "--similarity_metric",
+        "--metric",
+        "-m",
         type=str,
         default="jaccard_similarity",
         choices=[
@@ -39,7 +46,7 @@ def get_inputs():
             "jaro_similarity",
             "jaro_winkler_similarity",
         ],
-        help="Similarity metric to use for comparison (default: jaccard_similarity)",
+        help="Similarity metric to use for comparison",
     )
     return parser.parse_args()
 
@@ -52,6 +59,7 @@ def main():
             reference_files=args.reference_files,
             similarity_threshold=args.threshold,
             output_file=args.output,
+            text_output_file=args.text_output,
             quiet=args.quiet,
             min_length=args.min_length,
             similarity_metric=args.metric,

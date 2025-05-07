@@ -48,21 +48,24 @@ class TestTextToSentences:
         text = "This is one sentence. This is another sentence."
         result = _text_to_sentences(text)
         assert len(result) == 2
-        assert result[0] == "This is one sentence."
-        assert result[1] == "This is another sentence."
+        assert result[0] == ("This is one sentence.", 0, 22)
+        assert result[1] == ("This is another sentence.", 22, 47)
 
     def test_complex_sentence_splitting(self):
         """Test splitting with abbreviations and special cases."""
         text = "Dr. Smith went to the store. What did he buy? He bought apples, oranges, etc. Then he went home."
         result = _text_to_sentences(text)
+        # The expected result: [('Dr. Smith went to the store.', 0, 29), ('What did he buy?', 29, 46), ('He bought apples, oranges, etc.', 46, 78), ('Then he went home.', 78, 96)]
         assert len(result) == 4
-        assert "Dr. Smith went to the store." in result
-        assert "What did he buy?" in result
+        assert result[0] == ("Dr. Smith went to the store.", 0, 29)
+        assert result[1] == ("What did he buy?", 29, 46)
+        assert result[2] == ("He bought apples, oranges, etc.", 46, 78)
+        assert result[3] == ("Then he went home.", 78, 96)
 
     def test_empty_text(self):
         """Test that an empty text returns a list with one empty string."""
         result = _text_to_sentences("")
-        assert result == [""]
+        assert result == [("", 0, 0)]
 
 
 class TestSplitTextsToSentences:
@@ -76,10 +79,13 @@ class TestSplitTextsToSentences:
         )
 
         assert len(input_sents) == 2
-        assert "This is a test sentence." in input_sents
+        assert input_sents[0] == ("This is a test sentence.", 0, 25)
+        assert input_sents[1] == ("Another test sentence with similarity.", 25, 63)
         assert len(ref_doc_sents) == 2
-        assert len(ref_doc_sents["doc1.txt"]) == 2
-        assert len(ref_doc_sents["doc2.txt"]) == 1
+
+        assert ref_doc_sents["doc1.txt"][0] == ("This is a test sentence with words.", 0, 36)
+        assert ref_doc_sents["doc1.txt"][1] == ("Something completely different.", 36, 67)
+        assert ref_doc_sents["doc2.txt"][0] == ("Another test sentence with similarity and more words.", 0, 53)
 
     def test_min_length_filter(self, sample_texts):
         """Test that sentences shorter than min_length are filtered out."""
@@ -91,7 +97,7 @@ class TestSplitTextsToSentences:
         )
 
         assert len(input_sents) == 1
-        assert "Another test sentence with similarity." in input_sents
+        assert "Another test sentence with similarity." in input_sents[0][0]
         assert len(ref_doc_sents["doc2.txt"]) == 1
 
 
