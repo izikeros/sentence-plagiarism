@@ -58,15 +58,6 @@ def _cross_check_sentences(
     quiet,
     similarity_metric="jaccard_similarity",
 ):
-    from sentence_plagiarism.similarity import (
-        cosine_similarity,
-        jaccard_similarity,
-        jaro_similarity,
-        jaro_winkler_similarity,
-        overlap_similarity,
-        sorensen_dice_similarity,
-        tversky_similarity,
-    )
 
     metric_function = locals()[similarity_metric]
 
@@ -99,12 +90,17 @@ def _cross_check_sentences(
 
 def _display_similar_sentence(similarity_dict):
     print("Input Sentence:    ", similarity_dict["input_sentence"])
-    print(f"Input Position:     {similarity_dict['input_start_pos']}-{similarity_dict['input_end_pos']}")
+    print(
+        f"Input Position:     {similarity_dict['input_start_pos']}-{similarity_dict['input_end_pos']}"
+    )
     print("Reference Sentence:", similarity_dict["reference_sentence"])
-    print(f"Reference Position: {similarity_dict['reference_start_pos']}-{similarity_dict['reference_end_pos']}")
+    print(
+        f"Reference Position: {similarity_dict['reference_start_pos']}-{similarity_dict['reference_end_pos']}"
+    )
     print("Reference Document:", similarity_dict["reference_document"])
     print("Similarity Score:   {:.4f}".format(similarity_dict["similarity_score"]))
     print()
+
 
 def _write_to_text_file(results, text_output_file):
     """Write similarity results to a text file in a readable format."""
@@ -112,13 +108,18 @@ def _write_to_text_file(results, text_output_file):
         for i, similarity in enumerate(results, 1):
             f.write(f"Match #{i}\n")
             f.write(f"Input Sentence:     {similarity['input_sentence']}\n")
-            f.write(f"Input Position:     {similarity['input_start_pos']}-{similarity['input_end_pos']}\n")
+            f.write(
+                f"Input Position:     {similarity['input_start_pos']}-{similarity['input_end_pos']}\n"
+            )
             f.write(f"Reference Sentence: {similarity['reference_sentence']}\n")
-            f.write(f"Reference Position: {similarity['reference_start_pos']}-{similarity['reference_end_pos']}\n")
+            f.write(
+                f"Reference Position: {similarity['reference_start_pos']}-{similarity['reference_end_pos']}\n"
+            )
             f.write(f"Reference Document: {similarity['reference_document']}\n")
             f.write(f"Similarity Score:   {similarity['similarity_score']:.4f}\n")
             f.write("\n")
         print(f"Results saved to text file: {text_output_file}")
+
 
 def _get_all_files_content(examined_file, reference_files):
     with open(examined_file, encoding="utf-8") as f:
