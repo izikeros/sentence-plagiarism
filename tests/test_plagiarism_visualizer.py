@@ -4,10 +4,8 @@ from unittest.mock import mock_open, patch
 import pytest
 from bs4 import BeautifulSoup
 
-from sentence_plagiarism.plagiarism_visualizer import (
-    PlagiarismMatch,
-    split_text_into_segments,
-)
+from sentence_plagiarism.visualization.models import PlagiarismMatch
+from sentence_plagiarism.visualization.text_processing import split_text_into_segments
 
 
 def _offset_helper(content, plagiarized_text):
@@ -30,6 +28,7 @@ class TestSplitTextIntoSegments:
     @pytest.fixture
     def sample_content(self):
         return "This is a test document with some plagiarized content in the middle and at the end."
+
     #           01234567890123456789012345678901234567890123456789012345678901234567890123456789012
     #           0         1         2         3         4         5         6         7         8
 
@@ -369,8 +368,10 @@ class TestVisualizationRendering:
 
     def test_create_html_with_highlights(self):
         """Test that HTML is properly generated with highlight spans."""
-        from sentence_plagiarism.plagiarism_visualizer import (
+        from sentence_plagiarism.visualization.html_generator import (
             create_html_with_highlights_md,
+        )
+        from sentence_plagiarism.visualization.visualization_utils import (
             generate_document_colors,
         )
 
@@ -417,9 +418,9 @@ class TestVisualizationRendering:
 
     def test_complete_html_generation(self):
         """Test the complete HTML report generation process."""
-        from sentence_plagiarism.plagiarism_visualizer import (
+        from sentence_plagiarism.visualization.html_generator import generate_final_html
+        from sentence_plagiarism.visualization.visualization_utils import (
             generate_document_colors,
-            generate_final_html,
         )
 
         # Mock the internal template and file operations

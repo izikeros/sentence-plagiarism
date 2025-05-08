@@ -2,6 +2,7 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
+from sentence_plagiarism.cli import get_inputs
 from sentence_plagiarism.plagiarism_checker import (
     _cross_check_sentences,
     _display_similar_sentence,
@@ -145,7 +146,9 @@ class TestTextToSentences:
 
     def test_sentence_with_special_characters(self):
         """Test that leading whitespace is ignored."""
-        text = "This is a test-sentence with joe@example.com and math: 3+5(4/2)^6 [1],[2]."  # noqa
+        text = (
+            "This is a test-sentence with joe@example.com and math: 3+5(4/2)^6 [1],[2]."
+        )
         #       01234567890123456789012345678901234567890123456789012345678901234567890123
         result = _text_to_sentences(text)
         assert len(result) == 1
@@ -424,3 +427,44 @@ def test_check():
         output_file="results.json",
         quiet=False,
     )
+
+
+class TestCLI:
+    @patch("sys.argv", ["visualizer.py", "document.md", "reference1.txt"])
+    def test_default_output_filenames(self):
+        """Test that default output filenames are inferred correctly."""
+        args = get_inputs()
+        assert args.output == "document.json"
+        assert args.text_output == "document.html"
+
+    @patch(
+        "sys.argv",
+        [
+            "visualizer.py",
+            "document.md",
+            "reference1.txt",
+            "--output",
+            "custom.json",
+        ],
+    )
+    def test_custom_output_filename(self):
+        """Test that custom output filename overrides the default."""
+        args = get_inputs()
+        assert args.output == "custom.json"
+        assert args.text_output == "document.html"
+
+    @patch(
+        "sys.argv",
+        [
+            "visualizer.py",
+            "document.md",
+            "reference1.txt",
+            "--text_output",
+            "custom.html",
+        ],
+    )
+    def test_custom_text_output_filename(self):
+        """Test that custom text output filename overrides the default."""
+        args = get_inputs()
+        assert args.output == "document.json"
+        assert args.text_output == "custom.html"
