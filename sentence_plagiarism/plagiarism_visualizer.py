@@ -5,6 +5,11 @@ into an interactive HTML report highlighting plagiarized content.
 
 Usage:
    python plagiarism_visualizer.py --input document.md --plagiarism-data results.json --output report.html
+
+TODO:
+- add tested document name in the title and keep "Plagiarism Report" as subtitle
+- add possibility to fold/unfold sections without any plagiarism - display (on/off) only plagiarised sentences with some context - like 2 sentences before and after
+- simplify cli API - add default file names. when user provides input filename assume that JSON and HTML files will be created with the same name but different extensions
 """
 
 import argparse
