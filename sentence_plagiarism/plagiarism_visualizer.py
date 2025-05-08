@@ -14,18 +14,16 @@ TODO:
 
 import argparse
 import json
+import logging
 import random
 import re
-import sys
 import shutil
+import sys
 from pathlib import Path
 from typing import NamedTuple
-from bs4 import BeautifulSoup
+
 import markdown
-
-import logging
-
-from bs4 import NavigableString
+from bs4 import BeautifulSoup, NavigableString
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -49,7 +47,7 @@ class PlagiarismMatch:
         """Validate that sentence lengths match position ranges."""
         # Validate input sentence
         input_length = len(self.input_sentence)
-        input_range = self.input_end_pos - self.input_start_pos
+        input_range = self.input_end_pos - self.input_start_pos + 1
 
         if input_length != input_range:
             raise ValueError(
@@ -59,7 +57,7 @@ class PlagiarismMatch:
 
         # Validate reference sentence
         ref_length = len(self.reference_sentence)
-        ref_range = self.reference_end_pos - self.reference_start_pos
+        ref_range = self.reference_end_pos - self.reference_start_pos + 1
 
         if ref_length != ref_range:
             raise ValueError(
@@ -231,6 +229,7 @@ def split_text_into_segments(
 
     return segments
 
+
 def create_html_with_highlights_html(
     content: str, plagiarism_matches: list[PlagiarismMatch], doc_colors: dict[str, str]
 ) -> str:
@@ -313,16 +312,19 @@ def create_html_with_highlights_md(
     # TODO: the number of segments is not equal to the number of matches - it is greater - why?
     # Generate HTML with appropriate spans for highlights
     html_content = ""
+    num_segments = len(segments)
     for segment in segments:
+        txt = segment.text
         if not segment.matches:
             # Regular text, no plagiarism
-            html_content += segment.text
+            html_content += txt
         else:
             # Plagiarized text
             class_names = []
             doc_ids = []
             similarity_sum = 0
 
+            num_matches = len(segment.matches)
             for match in segment.matches:
                 doc_id = re.sub(r"[^a-zA-Z0-9]", "_", match.reference_document)
                 class_names.append(f"plag-doc-{doc_id}")
@@ -330,7 +332,7 @@ def create_html_with_highlights_md(
                 similarity_sum += match.similarity_score
 
             # Average similarity for overlapping segments
-            avg_similarity = similarity_sum / len(segment.matches)
+            avg_similarity = similarity_sum / num_matches
             opacity = min(
                 0.3 + avg_similarity * 0.7, 1.0
             )  # Scale opacity based on similarity
@@ -414,7 +416,7 @@ def generate_final_html(
     input_filename = Path(input_file).name
 
     # Read HTML template
-    with open(template_dir / "plagiarism_report_template.html", "r") as f:
+    with open(template_dir / "plagiarism_report_template.html") as f:
         template = f.read()
 
     # Fill in the template
@@ -488,9 +490,9 @@ def main() -> None:
     save_html(final_html, args.output)
 
 
-def test() -> None:
+def dev() -> None:
     """Main function to process files and generate visualization."""
-    #args = parse_arguments()
+    # args = parse_arguments()
 
     # Load and process input files
     markdown_content, plagiarism_matches = load_files("../BPMTE.md", "../BPMTE.json")
@@ -505,12 +507,17 @@ def test() -> None:
 
     # Generate the final HTML with CSS and JavaScript
     final_html = generate_final_html(
-        html_with_highlights, doc_colors, plagiarism_matches, "../BPMTE.md", "../BPMTE.html"
+        html_with_highlights,
+        doc_colors,
+        plagiarism_matches,
+        "../BPMTE.md",
+        "../BPMTE.html",
     )
 
     # Save the final HTML file
     save_html(final_html, "../BPMTE.html")
 
+
 if __name__ == "__main__":
-    #main()
-    test()
+    # main()
+    dev()
