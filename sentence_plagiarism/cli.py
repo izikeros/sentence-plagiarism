@@ -5,6 +5,8 @@ from sentence_plagiarism.plagiarism_checker import check
 
 
 def get_inputs():
+    import os
+
     parser = argparse.ArgumentParser(description="Plagiarism Detection Tool")
     parser.add_argument("input_file", help="Path to the input text file")
     parser.add_argument(
@@ -14,9 +16,7 @@ def get_inputs():
         "--threshold", "-t", type=float, default=0.8, help="Similarity threshold"
     )
     # output file to save results as JSON
-    parser.add_argument(
-        "--output", "-o", type=str, default="results.json", help="JSON output file name"
-    )
+    parser.add_argument("--output", "-o", type=str, help="JSON output file name")
     # text output file option
     parser.add_argument("--text_output", "-to", type=str, help="Text output file name")
     # add quiet mode to suppress output
@@ -48,7 +48,17 @@ def get_inputs():
         ],
         help="Similarity metric to use for comparison",
     )
-    return parser.parse_args()
+
+    args = parser.parse_args()
+
+    # Derive default output filenames if not provided
+    input_basename = os.path.splitext(os.path.basename(args.input_file))[0]
+    if not args.output:
+        args.output = f"{input_basename}.json"
+    if not args.text_output:
+        args.text_output = f"{input_basename}.html"
+
+    return args
 
 
 def main():
