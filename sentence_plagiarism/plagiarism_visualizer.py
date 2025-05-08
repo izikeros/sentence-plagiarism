@@ -23,7 +23,9 @@ from typing import NamedTuple
 import markdown
 
 
-class PlagiarismMatch(NamedTuple):
+
+@dataclass
+class PlagiarismMatch:
     """Represents a single plagiarism match."""
 
     input_sentence: str
@@ -34,6 +36,34 @@ class PlagiarismMatch(NamedTuple):
     reference_end_pos: int
     reference_document: str
     similarity_score: float
+
+    def __post_init__(self):
+        """Validate that sentence lengths match position ranges."""
+        # Validate input sentence
+        input_length = len(self.input_sentence)
+        input_range = self.input_end_pos - self.input_start_pos
+
+        if input_length != input_range:
+            raise ValueError(
+                f"Input sentence length ({input_length}) doesn't match position range "
+                f"({input_range}): {self.input_sentence}"
+            )
+
+        # Validate reference sentence
+        ref_length = len(self.reference_sentence)
+        ref_range = self.reference_end_pos - self.reference_start_pos
+
+        if ref_length != ref_range:
+            raise ValueError(
+                f"Reference sentence length ({ref_length}) doesn't match position range "
+                f"({ref_range}): {self.reference_sentence}"
+            )
+
+        # Validate similarity score is between 0 and 1
+        if not 0 <= self.similarity_score <= 1:
+            raise ValueError(
+                f"Similarity score must be between 0 and 1, got {self.similarity_score}"
+            )
 
 
 class SegmentType(NamedTuple):
