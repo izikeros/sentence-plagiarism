@@ -26,7 +26,12 @@ def _text_to_sentences(text):
         # Adjust start to skip leading whitespace
         while start < end and text[start].isspace():
             start += 1
-        sentence = text[start:end].strip()
+
+        # Additionally adjust end to skip trailing whitespace
+        while end > start and text[end-1].isspace():
+            end -= 1
+
+        sentence = text[start:end]  # No strip needed
         sentences.append((sentence, start, end))
 
     return sentences
