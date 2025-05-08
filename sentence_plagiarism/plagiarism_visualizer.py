@@ -183,6 +183,13 @@ def split_text_into_segments(
         positions.append((match.input_end_pos, "end", match))
 
     # Sort positions by their location and then by type (end comes before start)
+    # E.g. for matches: (1, "start"), (3, "end"), (3, "start"), (7, "end"), (5, "start"), (9, "end")
+    # we want to process the end of the first match before the start of the second
+    # This ensures that if two matches overlap, the end of the first match is processed before the start of the second
+    # This prevents the first match from being added to the active matches list when it is already ending
+    # This is important for the correct display of overlapping matches.
+    # After sorting, the positions will look like this:
+    # [(1, "start"), (3, "end"), (3, "start"), (5, "start"), (7, "end"), (9, "end")]
     positions.sort(key=lambda x: (x[0], 0 if x[1] == "end" else 1))
 
     segments = []
