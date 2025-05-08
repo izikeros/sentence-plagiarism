@@ -13,7 +13,8 @@ documentation = "https://github.com/izikeros/sentence-plagiarism"
 
 [tool.poetry.dependencies]
 python = ">=3.9"
-markdown = "^3.8"
+markdown = {extras = ["extra"], version = "^3.8"}
+beautifulsoup4 = "^4.13.4"
 
 [tool.poetry.scripts]
 sentence-plagiarism = 'sentence_plagiarism.cli:main'
@@ -25,6 +26,8 @@ ruff = "^0.11.7"
 black = "^25.1.0"
 isort = "^6.0.1"
 pytest-cov = "^6.1.1"
+pytest-icdiff = "^0.9"
+pytest-clarity = "^1.0.1"
 
 [tool.isort]
 profile = "black"
