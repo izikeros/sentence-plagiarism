@@ -45,11 +45,14 @@ def _text_to_sentences(text):
 
 
 def _split_texts_to_sentences(input_doc, reference_docs, min_length):
+    # Split the input document into sentences
     input_sent_data = [
         (s, start, end)
         for s, start, end in _text_to_sentences(input_doc)
         if len(s) >= min_length
     ]
+
+    # Split the reference documents into sentences
     ref_doc_sents = defaultdict(list)
 
     for ref_doc, ref_content in reference_docs.items():
