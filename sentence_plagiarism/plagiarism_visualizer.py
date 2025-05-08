@@ -187,7 +187,7 @@ def split_text_into_segments(
 
     segments = []
     current_pos = 0
-    active_matches = set()
+    active_matches = []
 
     # Handle the case where there's a text before the first position
     if positions and positions[0][0] > 0:
@@ -210,13 +210,14 @@ def split_text_into_segments(
                     start=current_pos,
                     end=pos,
                     text=segment_text,
-                    matches=list(active_matches),
+                    matches=active_matches.copy(),  # Use copy to prevent reference issues
                 )
             )
 
         # Update active matches
         if pos_type == "start":
-            active_matches.add(match)
+            if match not in active_matches:  # Avoid duplicates
+                active_matches.append(match)
         elif pos_type == "end":
             if match in active_matches:
                 active_matches.remove(match)
@@ -235,7 +236,6 @@ def split_text_into_segments(
         )
 
     return segments
-
 
 def create_html_with_highlights_html(
     content: str, plagiarism_matches: list[PlagiarismMatch], doc_colors: dict[str, str]
