@@ -17,11 +17,19 @@ import json
 import random
 import re
 import sys
+import shutil
 from pathlib import Path
 from typing import NamedTuple
-
+from bs4 import BeautifulSoup
 import markdown
 
+import logging
+
+from bs4 import NavigableString
+
+logging.basicConfig(level=logging.DEBUG)
+
+from dataclasses import dataclass
 
 
 @dataclass
@@ -101,7 +109,7 @@ def load_files(markdown_path: str, json_path: str) -> tuple[str, list[Plagiarism
             plagiarism_data = json.load(f)
 
         if "plagiarism_results" not in plagiarism_data:
-            # Try to handle direct list of results
+            # Try to handle a direct list of results
             if isinstance(plagiarism_data, list):
                 results = plagiarism_data
             else:
@@ -165,79 +173,150 @@ def generate_document_colors(
 
 
 def split_text_into_segments(
-        content: str, matches: list[PlagiarismMatch]
-    ) -> list[SegmentType]:
-        """
-        Split the document into segments, identifying which parts are plagiarized.
-        Handles overlapping segments properly.
-        """
-        # Create a list of all start and end positions
-        positions = []
-        for match in matches:
-            positions.append((match.input_start_pos, "start", match))
-            positions.append((match.input_end_pos, "end", match))
+    content: str, matches: list[PlagiarismMatch]
+) -> list[SegmentType]:
+    """Split the document into segments, identifying which parts are plagiarized."""
+    # Create a list of all start and end positions
+    positions = []
+    for match in matches:
+        positions.append((match.input_start_pos, "start", match))
+        positions.append((match.input_end_pos, "end", match))
 
-        # Sort positions by their location and then by type (end comes before start)
-        positions.sort(key=lambda x: (x[0], 0 if x[1] == "end" else 1))
+    # Sort positions by their location and then by type (end comes before start)
+    positions.sort(key=lambda x: (x[0], 0 if x[1] == "end" else 1))
 
-        segments = []
-        current_pos = 0
-        active_matches = set()
+    segments = []
+    current_pos = 0
+    active_matches = set()
 
-        # Handle the case where there's text before the first position
-        if positions and positions[0][0] > 0:
-            segments.append(
-                SegmentType(
-                    start=0,
-                    end=positions[0][0],
-                    text=content[0:positions[0][0]],
-                    matches=[],
-                )
+    # Handle the case where there's a text before the first position
+    if positions and positions[0][0] > 0:
+        segments.append(
+            SegmentType(
+                start=0,
+                end=positions[0][0],
+                text=content[0 : positions[0][0]],
+                matches=[],
             )
-            current_pos = positions[0][0]
+        )
+        current_pos = positions[0][0]
 
-        for pos, pos_type, match in positions:
-            # Add segment from current position to this new position
-            if pos > current_pos:
-                segment_text = content[current_pos:pos]
-                segments.append(
-                    SegmentType(
-                        start=current_pos,
-                        end=pos,
-                        text=segment_text,
-                        matches=list(active_matches),
-                    )
-                )
-
-            # Update active matches
-            if pos_type == "start":
-                active_matches.add(match)
-            elif pos_type == "end":
-                if match in active_matches:
-                    active_matches.remove(match)
-
-            current_pos = pos
-
-        # Add the final segment if there's content left
-        if current_pos < len(content):
+    for pos, pos_type, match in positions:
+        # Add segment from current position to this new position
+        if pos > current_pos:
+            segment_text = content[current_pos:pos]
             segments.append(
                 SegmentType(
                     start=current_pos,
-                    end=len(content),
-                    text=content[current_pos:],
-                    matches=[],
+                    end=pos,
+                    text=segment_text,
+                    matches=list(active_matches),
                 )
             )
 
-        return segments
+        # Update active matches
+        if pos_type == "start":
+            active_matches.add(match)
+        elif pos_type == "end":
+            if match in active_matches:
+                active_matches.remove(match)
+
+        current_pos = pos
+
+    # Add the final segment if there's content left
+    if current_pos < len(content):
+        segments.append(
+            SegmentType(
+                start=current_pos,
+                end=len(content),
+                text=content[current_pos:],
+                matches=[],
+            )
+        )
+
+    return segments
 
 
-def create_html_with_highlights(
+def create_html_with_highlights_html(
+    content: str, plagiarism_matches: list[PlagiarismMatch], doc_colors: dict[str, str]
+) -> str:
+    html = markdown.markdown(content, extensions=["tables", "fenced_code", "attr_list"])
+    soup = BeautifulSoup(html, "html.parser")
+
+    # Collect all text nodes with their offsets
+    text_nodes = []
+    offset = 0
+    for element in soup.descendants:
+        if element.name in ["script", "style"]:
+            continue
+        if isinstance(element, str):
+            length = len(element)
+            text_nodes.append(
+                {"node": element, "start": offset, "end": offset + length}
+            )
+            offset += length
+
+    # Sort matches by start position
+    plagiarism_matches.sort(key=lambda m: m.input_start_pos)
+
+    # Prepare replacements without modifying DOM immediately
+    replacements = []
+
+    for match in plagiarism_matches:
+        match_start = match.input_start_pos
+        match_end = match.input_end_pos
+
+        for tn in text_nodes:
+            node_start, node_end = tn["start"], tn["end"]
+            if node_end <= match_start or node_start >= match_end:
+                continue  # No overlap
+
+            relative_start = max(match_start - node_start, 0)
+            relative_end = min(match_end - node_start, node_end - node_start)
+
+            original_text = tn["node"]
+            parent = original_text.parent
+            if parent is None:
+                continue  # Skip nodes already detached
+
+            before = original_text[:relative_start]
+            highlight = original_text[relative_start:relative_end]
+            after = original_text[relative_end:]
+
+            span_tag = soup.new_tag("span")
+            doc_id = re.sub(r"[^a-zA-Z0-9]", "_", match.reference_document)
+            opacity = min(0.3 + match.similarity_score * 0.7, 1.0)
+            span_tag["class"] = f"plagiarized plag-doc-{doc_id}"
+            span_tag["style"] = (
+                f"opacity: {opacity}; background-color: {doc_colors[match.reference_document]}"
+            )
+            span_tag["data-references"] = match.reference_document
+            span_tag["data-similarity"] = f"{match.similarity_score:.2f}"
+            span_tag.string = highlight
+
+            new_nodes = []
+            if before:
+                new_nodes.append(NavigableString(before))
+            new_nodes.append(span_tag)
+            if after:
+                new_nodes.append(NavigableString(after))
+
+            replacements.append((original_text, new_nodes))
+
+    # Apply replacements after collecting all
+    for original_text, new_nodes in replacements:
+        if original_text.parent:
+            original_text.replace_with(*new_nodes)
+
+    return str(soup)
+
+
+def create_html_with_highlights_md(
     content: str, plagiarism_matches: list[PlagiarismMatch], doc_colors: dict[str, str]
 ) -> str:
     """Create HTML content with plagiarism highlights."""
     segments = split_text_into_segments(content, plagiarism_matches)
-
+    # TODO: the number of segments is not equal to the number of matches - it is greater - why?
     # Generate HTML with appropriate spans for highlights
     html_content = ""
     for segment in segments:
@@ -276,224 +355,96 @@ def create_html_with_highlights(
 
             html_content += f"<span {attrs}>{segment.text}</span>"
 
-    # Convert markdown to HTML, preserving our highlight spans
+    # Convert Markdown to HTML, preserving our highlight spans
     html = markdown.markdown(html_content, extensions=["tables", "fenced_code"])
 
     return html
+
+
+def get_document_specific_css(doc_colors: dict[str, str]) -> str:
+    """Generate CSS for document-specific colors."""
+    return "\n".join(
+        f".plag-doc-{re.sub(r'[^a-zA-Z0-9]', '_', doc)} {{ background-color: {color}; }}"
+        for doc, color in doc_colors.items()
+    )
+
+
+def generate_filter_buttons(reference_documents: set[str]) -> str:
+    """Generate HTML for filter buttons."""
+    buttons = '<button id="show-all-btn" class="control-btn active">Show All</button>'
+    buttons += '<button id="hide-all-btn" class="control-btn">Hide All</button>'
+
+    for doc in sorted(reference_documents):
+        doc_id = re.sub(r"[^a-zA-Z0-9]", "_", doc)
+        doc_name = Path(doc).name
+        buttons += f'<button class="filter-btn control-btn" data-doc="{doc_id}">{doc_name}</button>'
+
+    return buttons
+
+
+def generate_legend_items(doc_colors: dict[str, str]) -> str:
+    """Generate HTML for legend items."""
+    items = ""
+    for doc, color in doc_colors.items():
+        doc_id = re.sub(r"[^a-zA-Z0-9]", "_", doc)
+        doc_name = Path(doc).name
+        items += f'<div class="legend-item"><span class="color-box" style="background-color: {color};"></span>{doc_name}</div>'
+
+    return items
 
 
 def generate_final_html(
     html_content: str,
     doc_colors: dict[str, str],
     plagiarism_matches: list[PlagiarismMatch],
+    input_file: str,
+    output_path: str,
 ) -> str:
     """Generate the final self-contained HTML file with styling and JavaScript."""
     # Get unique list of reference documents for filter controls
-    reference_documents = sorted(
-        {match.reference_document for match in plagiarism_matches}
-    )
+    reference_documents = {match.reference_document for match in plagiarism_matches}
 
     # Create filter buttons HTML
-    filter_buttons = ""
-    filter_buttons += (
-        '<button id="show-all-btn" class="control-btn active">Show All</button>'
-    )
-    filter_buttons += '<button id="hide-all-btn" class="control-btn">Hide All</button>'
-
-    for doc in reference_documents:
-        doc_id = re.sub(r"[^a-zA-Z0-9]", "_", doc)
-        doc_name = Path(doc).name
-        filter_buttons += f'<button class="filter-btn control-btn" data-doc="{doc_id}">{doc_name}</button>'
+    filter_buttons = generate_filter_buttons(reference_documents)
 
     # Create document legend
-    legend_items = ""
-    for doc, color in doc_colors.items():
-        doc_id = re.sub(r"[^a-zA-Z0-9]", "_", doc)
-        doc_name = Path(doc).name
-        legend_items += f'<div class="legend-item"><span class="color-box" style="background-color: {color};"></span>{doc_name}</div>'
+    legend_items = generate_legend_items(doc_colors)
 
-    # Define CSS
-    css = f"""
-   <style>
-       body {{
-           font-family: Arial, sans-serif;
-           line-height: 1.6;
-           max-width: 900px;
-           margin: 0 auto;
-           padding: 20px;
-       }}
+    # Create document-specific CSS
+    document_colors = get_document_specific_css(doc_colors)
 
-       .controls {{
-           position: sticky;
-           top: 0;
-           background: white;
-           padding: 15px 0;
-           border-bottom: 1px solid #ddd;
-           margin-bottom: 20px;
-           z-index: 100;
-       }}
+    # Get template directory path
+    template_dir = Path(__file__).parent / "templates"
 
-       .control-btn {{
-           padding: 8px 12px;
-           margin-right: 5px;
-           border: 1px solid #ccc;
-           background: #f5f5f5;
-           cursor: pointer;
-           border-radius: 4px;
-       }}
+    # Get input filename for title
+    input_filename = Path(input_file).name
 
-       .control-btn.active {{
-           background: #4CAF50;
-           color: white;
-           border-color: #4CAF50;
-       }}
+    # Read HTML template
+    with open(template_dir / "plagiarism_report_template.html", "r") as f:
+        template = f.read()
 
-       .legend {{
-           margin-top: 10px;
-           display: flex;
-           flex-wrap: wrap;
-           gap: 10px;
-       }}
+    # Fill in the template
+    output_html = template.format(
+        title=f"Plagiarism Report: {input_filename}",
+        subtitle="Plagiarism Visualization",
+        filter_buttons=filter_buttons,
+        legend_items=legend_items,
+        document_colors=document_colors,
+        content=html_content,
+    )
 
-       .legend-item {{
-           display: flex;
-           align-items: center;
-           margin-right: 15px;
-       }}
+    # Create output directory if it doesn't exist
+    output_dir = Path(output_path).parent
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-       .color-box {{
-           width: 15px;
-           height: 15px;
-           display: inline-block;
-           margin-right: 5px;
-           border: 1px solid #333;
-       }}
+    # Copy CSS and JS files to the output directory
+    css_path = template_dir / "plagiarism_report.css"
+    js_path = template_dir / "plagiarism_report.js"
 
-       .plagiarized {{
-           position: relative;
-           border-radius: 3px;
-           cursor: pointer;
-       }}
+    shutil.copy(css_path, output_dir / "plagiarism_report.css")
+    shutil.copy(js_path, output_dir / "plagiarism_report.js")
 
-       .plagiarized:hover {{
-           filter: brightness(0.9);
-       }}
-
-       .plagiarized:hover::after {{
-           content: attr(data-references) "\\A" "Similarity: " attr(data-similarity);
-           position: absolute;
-           bottom: 100%;
-           left: 0;
-           background: #333;
-           color: white;
-           padding: 5px 10px;
-           border-radius: 3px;
-           font-size: 14px;
-           white-space: pre;
-           z-index: 10;
-           pointer-events: none;
-       }}
-
-       .hidden {{
-           background-color: transparent !important;
-           border: 1px dashed #ccc;
-       }}
-
-       pre, code {{
-           background-color: #f6f8fa;
-           border-radius: 3px;
-           padding: 10px;
-           overflow-x: auto;
-       }}
-
-       /* Document-specific colors */
-       {
-        chr(10).join(
-            [
-                f".plag-doc-{re.sub(r'[^a-zA-Z0-9]', '_', doc)} {{ background-color: {color}; }}"
-                for doc, color in doc_colors.items()
-            ]
-        )
-    }
-   </style>
-   """
-
-    # Define JavaScript
-    js = """
-   <script>
-       document.addEventListener('DOMContentLoaded', function() {
-           // Show/Hide all buttons
-           document.getElementById('show-all-btn').addEventListener('click', function() {
-               document.querySelectorAll('.plagiarized').forEach(el => {
-                   el.classList.remove('hidden');
-               });
-               setActiveButton(this);
-           });
-
-           document.getElementById('hide-all-btn').addEventListener('click', function() {
-               document.querySelectorAll('.plagiarized').forEach(el => {
-                   el.classList.add('hidden');
-               });
-               setActiveButton(this);
-           });
-
-           // Filter buttons
-           document.querySelectorAll('.filter-btn').forEach(btn => {
-               btn.addEventListener('click', function() {
-                   const docId = this.getAttribute('data-doc');
-
-                   // Hide all plagiarism highlights
-                   document.querySelectorAll('.plagiarized').forEach(el => {
-                       el.classList.add('hidden');
-                   });
-
-                   // Show only the selected document's highlights
-                   document.querySelectorAll('.plag-doc-' + docId).forEach(el => {
-                       el.classList.remove('hidden');
-                   });
-
-                   setActiveButton(this);
-               });
-           });
-
-           function setActiveButton(activeBtn) {
-               document.querySelectorAll('.control-btn').forEach(btn => {
-                   btn.classList.remove('active');
-               });
-               activeBtn.classList.add('active');
-           }
-       });
-   </script>
-   """
-
-    # Combine everything into a complete HTML document
-    complete_html = f"""<!DOCTYPE html>
-   <html lang="en">
-   <head>
-       <meta charset="UTF-8">
-       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-       <title>Plagiarism Report</title>
-       {css}
-   </head>
-   <body>
-       <div class="controls">
-           <h2>Plagiarism Visualization</h2>
-           <div class="buttons">
-               {filter_buttons}
-           </div>
-           <div class="legend">
-               {legend_items}
-           </div>
-       </div>
-       <div class="content">
-           {html_content}
-       </div>
-       {js}
-   </body>
-   </html>
-   """
-
-    return complete_html
+    return output_html
 
 
 def save_html(html_content: str, output_path: str) -> None:
@@ -517,13 +468,13 @@ def main() -> None:
     doc_colors = generate_document_colors(plagiarism_matches)
 
     # Create HTML with plagiarism highlights
-    html_with_highlights = create_html_with_highlights(
+    html_with_highlights = create_html_with_highlights_md(
         markdown_content, plagiarism_matches, doc_colors
     )
 
     # Generate the final HTML with CSS and JavaScript
     final_html = generate_final_html(
-        html_with_highlights, doc_colors, plagiarism_matches
+        html_with_highlights, doc_colors, plagiarism_matches, args.input, args.output
     )
 
     # Save the final HTML file
@@ -554,4 +505,5 @@ def test() -> None:
     save_html(final_html, "../BPMTE.html")
 
 if __name__ == "__main__":
-    main()
+    #main()
+    test()
