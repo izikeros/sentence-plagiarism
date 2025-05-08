@@ -83,19 +83,6 @@ class SegmentType(NamedTuple):
     matches: list[PlagiarismMatch]
 
 
-def parse_arguments() -> argparse.Namespace:
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Generate HTML visualization of plagiarism in Markdown documents"
-    )
-    parser.add_argument("--input", required=True, help="Input Markdown file")
-    parser.add_argument(
-        "--plagiarism-data", required=True, help="JSON file with plagiarism data"
-    )
-    parser.add_argument("--output", required=True, help="Output HTML file")
-    return parser.parse_args()
-
-
 def load_files(markdown_path: str, json_path: str) -> tuple[str, list[PlagiarismMatch]]:
     """Load and validate the input files."""
     try:
@@ -462,6 +449,19 @@ def save_html(html_content: str, output_path: str) -> None:
         print(f"Successfully saved HTML report to {output_path}")
     except OSError as e:
         sys.exit(f"Error saving HTML file: {e}")
+
+
+def parse_arguments() -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="Generate HTML visualization of plagiarism in Markdown documents"
+    )
+    parser.add_argument("--input", required=True, help="Input Markdown file")
+    parser.add_argument(
+        "--plagiarism-data", required=True, help="JSON file with plagiarism data"
+    )
+    parser.add_argument("--output", required=True, help="Output HTML file")
+    return parser.parse_args()
 
 
 def main() -> None:
