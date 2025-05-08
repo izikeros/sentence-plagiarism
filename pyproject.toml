@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sentence-plagiarism"
-version = "0.7.1"
+version = "0.7.2"
 description = "Compare sentences from input document with all sentences from reference documents - find very similar ones."
 authors = ["Krystian Safjan <ksafjan@gmail.com>"]
 license = "MIT"
@@ -12,13 +12,13 @@ repository = "https://github.com/izikeros/sentence-plagiarism"
 documentation = "https://github.com/izikeros/sentence-plagiarism"
 
 [tool.poetry.dependencies]
-python = ">=3.9"
+python = ">=3.9,<4.0"
 markdown = {extras = ["extra"], version = "^3.8"}
 beautifulsoup4 = "^4.13.4"
 
 [tool.poetry.scripts]
 sentence-plagiarism = 'sentence_plagiarism.cli:main'
-plagiarism-visualizer = 'sentence_plagiarism.plagiarism_visualizer:main'
+plagiarism-visualizer = 'sentence_plagiarism.visualization.visualizer:main'
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
@@ -28,6 +28,7 @@ isort = "^6.0.1"
 pytest-cov = "^6.1.1"
 pytest-icdiff = "^0.9"
 pytest-clarity = "^1.0.1"
+loguru = "^0.7.3"
 
 [tool.isort]
 profile = "black"
