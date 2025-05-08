@@ -530,5 +530,28 @@ def main() -> None:
     save_html(final_html, args.output)
 
 
+def test() -> None:
+    """Main function to process files and generate visualization."""
+    #args = parse_arguments()
+
+    # Load and process input files
+    markdown_content, plagiarism_matches = load_files("../BPMTE.md", "../BPMTE.json")
+
+    # Generate colors for each reference document
+    doc_colors = generate_document_colors(plagiarism_matches)
+
+    # Create HTML with plagiarism highlights
+    html_with_highlights = create_html_with_highlights_md(
+        markdown_content, plagiarism_matches, doc_colors
+    )
+
+    # Generate the final HTML with CSS and JavaScript
+    final_html = generate_final_html(
+        html_with_highlights, doc_colors, plagiarism_matches, "../BPMTE.md", "../BPMTE.html"
+    )
+
+    # Save the final HTML file
+    save_html(final_html, "../BPMTE.html")
+
 if __name__ == "__main__":
     main()
