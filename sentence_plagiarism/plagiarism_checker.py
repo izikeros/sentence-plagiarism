@@ -40,7 +40,6 @@ def _text_to_sentences(text):
         if sentence.strip() == "":
             continue
         sentences.append((sentence, start, end))
-
     return sentences
 
 
