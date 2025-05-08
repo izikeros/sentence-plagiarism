@@ -7,7 +7,13 @@ from itertools import product
 
 
 def _text_to_sentences(text):
-    """Split the text into sentences and track their positions."""
+    """Split the text into sentences and track their positions.
+
+    - Ignore leading whitespace - assuming it belongs to the previous sentence.
+    - include trailing whitespace - assuming it belongs to the current sentence.
+    - start, end positions are inclusive. e.g. for string "abc def", start=0, end=2, the sentence is "abc".
+
+    """
     sentences = []
     # The regex pattern splits text into sentences by identifying sentence-ending punctuation ('.', '?' or '!')
     # followed by whitespace. It avoids splitting on abbreviations (e.g., "e.g.", "Dr.") or initials (e.g., "A.B.").
@@ -22,16 +28,17 @@ def _text_to_sentences(text):
     # Extract sentences with their positions
     for i in range(len(positions) - 1):
         start = positions[i]
-        end = positions[i + 1]
+        end = positions[i + 1] - 1
+        if end == -1:
+            end = 0  # or len(text) - 1
         # Adjust start to skip leading whitespace
         while start < end and text[start].isspace():
             start += 1
 
-        # Additionally adjust end to skip trailing whitespace
-        while end > start and text[end-1].isspace():
-            end -= 1
-
-        sentence = text[start:end]  # No strip needed
+        sentence = text[start : end + 1]
+        # Ignore strings that are all whitespace
+        if sentence.strip() == "":
+            continue
         sentences.append((sentence, start, end))
 
     return sentences
