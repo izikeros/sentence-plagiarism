@@ -1,6 +1,5 @@
 import logging
 import re
-import shutil
 from pathlib import Path
 
 import markdown
@@ -138,8 +137,17 @@ def generate_final_html(
     input_filename = Path(input_file).name
 
     # Read HTML template
+    # Read the HTML template
     with open(template_dir / "plagiarism_report_template.html") as f:
         template = f.read()
+
+    # Read and inline CSS
+    with open(template_dir / "plagiarism_report.css") as css_file:
+        inlined_css = css_file.read()
+
+    # Read and inline JS
+    with open(template_dir / "plagiarism_report.js") as js_file:
+        inlined_js = js_file.read()
 
     # input file without extension and without the path
     input_filename_stem = Path(input_file).stem
@@ -152,6 +160,8 @@ def generate_final_html(
         filter_buttons=filter_buttons,
         legend_items=legend_items,
         document_colors=document_colors,
+        inlined_css=document_colors + "\n" + inlined_css,
+        inlined_js=inlined_js,
         content=html_content,
     )
 
@@ -159,11 +169,6 @@ def generate_final_html(
     output_dir = Path(output_path).parent
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Copy CSS and JS files to the output directory
-    css_path = template_dir / "plagiarism_report.css"
-    js_path = template_dir / "plagiarism_report.js"
-
-    shutil.copy(css_path, output_dir / "plagiarism_report.css")
-    shutil.copy(js_path, output_dir / "plagiarism_report.js")
+    # Remove copying of CSS and JS files as they are now inlined
 
     return output_html
