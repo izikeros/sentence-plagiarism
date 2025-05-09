@@ -8,7 +8,9 @@
         /* Document-specific colors will be injected here */
         {document_colors}
     </style>
-    <link rel="stylesheet" href="plagiarism_report.css">
+    <style>
+        {inlined_css}
+    </style>
 </head>
 <body>
     <div class="controls">
@@ -24,6 +26,8 @@
     <div class="content">
         {content}
     </div>
-    <script src="plagiarism_report.js"></script>
+    <script>
+        {inlined_js}
+    </script>
 </body>
 </html>
