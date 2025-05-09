@@ -24,7 +24,9 @@ class PlagiarismMatch:
         input_length = len(self.input_sentence)
         input_range = self.input_end_pos - self.input_start_pos + 1
 
-        logger.debug(f"Validating input: length={input_length}, range={input_range}, sentence='{self.input_sentence}'")
+        logger.debug(
+            f"Validating input: length={input_length}, range={input_range}, sentence='{self.input_sentence}'"
+        )
         if input_length != input_range:
             raise ValueError(
                 f"Input sentence length ({input_length}) doesn't match position range "
@@ -35,7 +37,9 @@ class PlagiarismMatch:
         ref_length = len(self.reference_sentence)
         ref_range = self.reference_end_pos - self.reference_start_pos + 1
 
-        logger.debug(f"Validating reference: length={ref_length}, range={ref_range}, sentence='{self.reference_sentence}'")
+        logger.debug(
+            f"Validating reference: length={ref_length}, range={ref_range}, sentence='{self.reference_sentence}'"
+        )
         if ref_length != ref_range:
             raise ValueError(
                 f"Reference sentence length ({ref_length}) doesn't match position range "
