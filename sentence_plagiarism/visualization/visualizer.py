@@ -10,10 +10,13 @@ TODO:
 - add possibility to fold/unfold sections without any plagiarism
     - display (on/off) only plagiarised sentences with some context - like 2 sentences before and after
     - divide text to plagiarized and non-plagiarized divs and allow to fold/unfold unplagiarised divs
+- generate standalone - single file HTML report with all CSS and JS included
+
 """
 
 import argparse
 import logging
+import re
 
 from sentence_plagiarism.visualization.file_handlers import load_files, save_html
 from sentence_plagiarism.visualization.html_generator import (
@@ -58,6 +61,10 @@ def main() -> None:
     html_with_highlights = create_html_with_highlights_md(
         markdown_content, plagiarism_matches, doc_colors
     )
+
+    # Cleanup output
+    # remove ****
+    html_with_highlights = re.sub(r"\*\*\*\*", "", html_with_highlights)
 
     # Generate the final HTML with CSS and JavaScript
     final_html = generate_final_html(
