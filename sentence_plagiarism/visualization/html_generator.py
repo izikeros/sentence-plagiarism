@@ -115,7 +115,6 @@ def generate_final_html(
     doc_colors: dict[str, str],
     plagiarism_matches: list[PlagiarismMatch],
     input_file: str,
-    output_path: str,
 ) -> str:
     """Generate the final self-contained HTML file with styling and JavaScript."""
     # Get unique list of reference documents for filter controls
@@ -162,10 +161,5 @@ def generate_final_html(
         content=html_content,
     )
 
-    # Create an output directory if it doesn't exist
-    output_dir = Path(output_path).parent
-    output_dir.mkdir(parents=True, exist_ok=True)
-
     # Remove copying of CSS and JS files as they are now inlined
-
     return output_html

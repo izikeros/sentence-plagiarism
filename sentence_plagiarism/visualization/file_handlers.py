@@ -1,5 +1,6 @@
 import json
 import sys
+from pathlib import Path
 
 from sentence_plagiarism.visualization.models import PlagiarismMatch
 
@@ -48,6 +49,11 @@ def load_files(markdown_path: str, json_path: str) -> tuple[str, list[Plagiarism
 
 def save_html(html_content: str, output_path: str) -> None:
     """Save HTML content to the specified output file."""
+
+    # Create an output directory if it doesn't exist
+    output_dir = Path(output_path).parent
+    output_dir.mkdir(parents=True, exist_ok=True)
+
     try:
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(html_content)
