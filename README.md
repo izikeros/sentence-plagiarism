@@ -100,19 +100,23 @@ from sentence_plagiarism import check
 
 # Basic usage
 check(
-    examined_file="input.txt",
-    reference_files=["ref1.txt", "ref2.txt"],
-    similarity_threshold=0.8,
-    output_file="results.json",
-    text_output_file="results.txt",
-    quiet=False,
-    min_length=10,
-    similarity_metric="jaccard_similarity"
+   examined_file="input.txt",
+   reference_files=["ref1.txt", "ref2.txt"],
+   similarity_threshold=0.8,
+   output_file="results.json",
+   text_output_file="results.txt",
+   quiet=False,
+   min_length=10,
+   similarity_metric="jaccard_similarity"
 )
 
 # Visualization from Python
-from sentence_plagiarism.plagiarism_visualizer import load_files, generate_document_colors
-from sentence_plagiarism.plagiarism_visualizer import create_html_with_highlights, generate_final_html, save_html
+from sentence_plagiarism.visualization.visualization_utils import generate_document_colors
+from sentence_plagiarism.visualization.file_handlers import load_files
+from sentence_plagiarism.visualization.visualizer import create_html_with_highlights,
+from sentence_plagiarism.visualization.html_generator import generate_final_html
+
+save_html
 
 # Generate visualization
 markdown_content, plagiarism_matches = load_files("input.md", "results.json")
