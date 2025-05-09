@@ -10,8 +10,8 @@ def _text_to_sentences(text):
     """Split the text into sentences and track their positions.
 
     - Ignore leading whitespace - assuming it belongs to the previous sentence.
-    - include trailing whitespace - assuming it belongs to the current sentence.
-    - start, end positions are inclusive. e.g. for string "abc def", start=0, end=2, the sentence is "abc".
+    - Include trailing whitespace - assuming it belongs to the current sentence.
+    - Start, end positions are inclusive. e.g., for string "abc def", start=0, end=2, the sentence is "abc".
 
     """
     sentences = []
@@ -22,8 +22,10 @@ def _text_to_sentences(text):
     # Find all split positions
     split_positions = [m.start() + 1 for m in re.finditer(pattern, text)]
 
-    # Add start of text and end of text to create complete ranges
-    positions = [0] + split_positions + [len(text)]
+    # Add the start of a text and end of a text to create complete ranges
+    positions = [0] + split_positions + [len(text)]  # noqa: RUF005
+    # TODO: KS: 2025-05-09: replace with:
+    # positions = [0, *split_positions, len(text)]
 
     # Extract sentences with their positions
     for i in range(len(positions) - 1):
@@ -204,7 +206,7 @@ def check(
             if not quiet:
                 print(f"Results saved to JSON file: {output_file}")
 
-    # Output to text file if specified
+    # Output to a text file if specified
     if text_output_file:
         _write_to_text_file(results, text_output_file)
 
