@@ -38,6 +38,11 @@ def split_text_into_segments(
     logger.debug("Starting split_text_into_segments")
     logger.debug(f"Content length: {len(content)}")
     logger.debug(f"Number of matches: {len(matches)}")
+    positions = []
+    for match in matches:
+        positions.append((match.input_start_pos, "start", match))
+        positions.append((match.input_end_pos, "end", match))
+    logger.debug(f"Positions before processing: {positions}")
     """Split the document into segments, identifying which parts are plagiarized."""
     # Create a list of all start and end positions
     positions = []
@@ -72,12 +77,7 @@ def split_text_into_segments(
         current_pos = positions[0][0]
 
     for pos, pos_type, match in positions:
-        logger.debug(
-            f"Processing position: {pos}, type: {pos_type}, match: {match}",
-            pos,
-            pos_type,
-            match,
-        )
+        logger.debug(f"Processing position: {pos}, type: {pos_type}, match: {match}")
         # Add segment from current position to this new position
         if pos > current_pos:
             segment_text = content[current_pos:pos]
@@ -90,7 +90,9 @@ def split_text_into_segments(
                 )
             )
 
+        logger.debug(f"Active matches before update: {active_matches}")
         # Update active matches
+        logger.debug(f"Active matches after update: {active_matches}")
         if pos_type == "start":
             if match not in active_matches:  # Avoid duplicates
                 active_matches.append(match)
