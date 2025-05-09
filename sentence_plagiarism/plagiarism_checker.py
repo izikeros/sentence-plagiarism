@@ -7,7 +7,13 @@ from itertools import product
 
 
 def _text_to_sentences(text):
-    """Split the text into sentences and track their positions."""
+    """Split the text into sentences and track their positions.
+
+    - Ignore leading whitespace - assuming it belongs to the previous sentence.
+    - Include trailing whitespace - assuming it belongs to the current sentence.
+    - Start, end positions are inclusive. e.g., for string "abc def", start=0, end=2, the sentence is "abc".
+
+    """
     sentences = []
     # The regex pattern splits text into sentences by identifying sentence-ending punctuation ('.', '?' or '!')
     # followed by whitespace. It avoids splitting on abbreviations (e.g., "e.g.", "Dr.") or initials (e.g., "A.B.").
@@ -16,28 +22,38 @@ def _text_to_sentences(text):
     # Find all split positions
     split_positions = [m.start() + 1 for m in re.finditer(pattern, text)]
 
-    # Add start of text and end of text to create complete ranges
-    positions = [0] + split_positions + [len(text)]
+    # Add the start of a text and end of a text to create complete ranges
+    positions = [0] + split_positions + [len(text)]  # noqa: RUF005
+    # TODO: KS: 2025-05-09: replace with:
+    # positions = [0, *split_positions, len(text)]
 
     # Extract sentences with their positions
     for i in range(len(positions) - 1):
         start = positions[i]
-        end = positions[i + 1]
+        end = positions[i + 1] - 1
+        if end == -1:
+            end = 0  # or len(text) - 1
         # Adjust start to skip leading whitespace
         while start < end and text[start].isspace():
             start += 1
-        sentence = text[start:end].strip()
-        sentences.append((sentence, start, end))
 
+        sentence = text[start : end + 1]
+        # Ignore strings that are all whitespace
+        if sentence.strip() == "":
+            continue
+        sentences.append((sentence, start, end))
     return sentences
 
 
 def _split_texts_to_sentences(input_doc, reference_docs, min_length):
+    # Split the input document into sentences
     input_sent_data = [
         (s, start, end)
         for s, start, end in _text_to_sentences(input_doc)
         if len(s) >= min_length
     ]
+
+    # Split the reference documents into sentences
     ref_doc_sents = defaultdict(list)
 
     for ref_doc, ref_content in reference_docs.items():
@@ -190,7 +206,7 @@ def check(
             if not quiet:
                 print(f"Results saved to JSON file: {output_file}")
 
-    # Output to text file if specified
+    # Output to a text file if specified
     if text_output_file:
         _write_to_text_file(results, text_output_file)
 

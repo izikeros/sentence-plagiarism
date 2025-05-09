@@ -17,3 +17,6 @@ env/
 .vscode/
 
 results.json
+out/
+scripts/
+docs/

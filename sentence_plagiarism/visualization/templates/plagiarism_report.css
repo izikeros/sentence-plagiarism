@@ -1,0 +1,90 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.controls {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 15px 0;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+    z-index: 100;
+}
+
+.control-btn {
+    padding: 8px 12px;
+    margin-right: 5px;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.control-btn.active {
+    background: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+
+.legend {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+}
+
+.color-box {
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    margin-right: 5px;
+    border: 1px solid #333;
+}
+
+.plagiarized {
+    position: relative;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.plagiarized:hover {
+    filter: brightness(0.9);
+}
+
+.plagiarized:hover::after {
+    content: attr(data-references) "\A" "Similarity: " attr(data-similarity);
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background: #333;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 3px;
+    font-size: 14px;
+    white-space: pre;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.hidden {
+    background-color: transparent !important;
+    border: 1px dashed #ccc;
+}
+
+pre, code {
+    background-color: #f6f8fa;
+    border-radius: 3px;
+    padding: 10px;
+    overflow-x: auto;
+}

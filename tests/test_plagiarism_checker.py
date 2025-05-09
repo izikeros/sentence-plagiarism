@@ -2,6 +2,7 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
+from sentence_plagiarism.cli import get_inputs
 from sentence_plagiarism.plagiarism_checker import (
     _cross_check_sentences,
     _display_similar_sentence,
@@ -16,9 +17,15 @@ from sentence_plagiarism.plagiarism_checker import (
 def sample_texts():
     """Fixture providing sample texts for testing."""
     input_text = "This is a test sentence. Another test sentence with similarity."
+    #             012345678901234567890123456789012345678901234567890123456789012
+    #             0         1         2         3         4         5
     ref_docs = {
         "doc1.txt": "This is a test sentence with words. Something completely different.",
+        #            0123456789012345678901234567890123456789012345678901234567890123456
+        #            0         1         2         3         4         5
         "doc2.txt": "Another test sentence with similarity and more words.",
+        #            01234567890123456789012345678901234567890123456789012
+        #            0         1         2         3         4         5
     }
     return input_text, ref_docs
 
@@ -46,26 +53,111 @@ class TestTextToSentences:
     def test_basic_sentence_splitting(self):
         """Test that _text_to_sentences correctly splits basic sentences."""
         text = "This is one sentence. This is another sentence."
+        #       01234567890123456789012345678901234567890123456
         result = _text_to_sentences(text)
         assert len(result) == 2
-        assert result[0] == ("This is one sentence.", 0, 22)
-        assert result[1] == ("This is another sentence.", 22, 47)
+        assert result[0][0] == "This is one sentence. "
+        #                       0123456789012345678901
+        assert result[0][1] == 0
+        assert result[0][2] == 21
+
+        assert result[1][0] == "This is another sentence."
+        #                       2345678901234567890123456
+        assert result[1][1] == 22
+        assert result[1][2] == 46
 
     def test_complex_sentence_splitting(self):
         """Test splitting with abbreviations and special cases."""
         text = "Dr. Smith went to the store. What did he buy? He bought apples, oranges, etc. Then he went home."
+        #       012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345
         result = _text_to_sentences(text)
         # The expected result: [('Dr. Smith went to the store.', 0, 29), ('What did he buy?', 29, 46), ('He bought apples, oranges, etc.', 46, 78), ('Then he went home.', 78, 96)]
         assert len(result) == 4
-        assert result[0] == ("Dr. Smith went to the store.", 0, 29)
-        assert result[1] == ("What did he buy?", 29, 46)
-        assert result[2] == ("He bought apples, oranges, etc.", 46, 78)
-        assert result[3] == ("Then he went home.", 78, 96)
+
+        assert result[0][0] == "Dr. Smith went to the store. "
+        assert result[0][1] == 0
+        assert result[0][2] == 28
+
+        assert result[1][0] == "What did he buy? "
+        assert result[1][1] == 29
+        assert result[1][2] == 45
+
+        assert result[2][0] == "He bought apples, oranges, etc. "
+        assert result[2][1] == 46
+        assert result[2][2] == 77
+
+        assert result[3][0] == "Then he went home."
+        assert result[3][1] == 78
+        assert result[3][2] == 95
 
     def test_empty_text(self):
-        """Test that an empty text returns a list with one empty string."""
+        """Test that an empty text returns an empty list."""
         result = _text_to_sentences("")
-        assert result == [("", 0, 0)]
+        assert result == []
+
+    def test_no_sentences(self):
+        """Test that a text with no punctuation returns the whole text as one sentence."""
+        text = "No sentences here"
+        result = _text_to_sentences(text)
+        assert len(result) == 1
+        assert result[0][0] == "No sentences here"
+
+    def test_period_at_end(self):
+        """Test that a text with punctuation at the end is handled correctly."""
+        text = "This is a test sentence."
+        result = _text_to_sentences(text)
+        assert len(result) == 1
+        assert result[0][0] == "This is a test sentence."
+        assert result[0][1] == 0
+        assert result[0][2] == 23
+
+    def test_exclamation_mark(self):
+        """Test that a text with an exclamation mark is handled correctly."""
+        text = "This is a test sentence! Another one."
+        result = _text_to_sentences(text)
+        assert len(result) == 2
+        assert result[0][0] == "This is a test sentence! "
+        assert result[0][1] == 0
+        assert result[0][2] == 24
+
+        assert result[1][0] == "Another one."
+        assert result[1][1] == 25
+        assert result[1][2] == 36
+
+    def test_leading_whitespace(self):
+        """Test that leading whitespace is ignored."""
+        text = "   This is a test sentence.  "
+        #       01234567890123456789012345678901234567890123456
+        result = _text_to_sentences(text)
+        assert len(result) == 1
+        assert result[0][0] == "This is a test sentence. "
+        assert result[0][1] == 3
+        assert result[0][2] == 27
+
+    def test_sentence_with_dashes(self):
+        """Test that leading whitespace is ignored."""
+        text = "This is a test-sentence."
+        #       01234567890123456789012345678901234567890123456
+        result = _text_to_sentences(text)
+        assert len(result) == 1
+        assert result[0][0] == "This is a test-sentence."
+        assert result[0][1] == 0
+        assert result[0][2] == 23
+
+    def test_sentence_with_special_characters(self):
+        """Test that leading whitespace is ignored."""
+        text = (
+            "This is a test-sentence with joe@example.com and math: 3+5(4/2)^6 [1],[2]."
+        )
+        #       01234567890123456789012345678901234567890123456789012345678901234567890123
+        result = _text_to_sentences(text)
+        assert len(result) == 1
+        assert (
+            result[0][0]
+            == "This is a test-sentence with joe@example.com and math: 3+5(4/2)^6 [1],[2]."
+        )
+        assert result[0][1] == 0
+        assert result[0][2] == 73
 
 
 class TestSplitTextsToSentences:
@@ -79,24 +171,24 @@ class TestSplitTextsToSentences:
         )
 
         assert len(input_sents) == 2
-        assert input_sents[0] == ("This is a test sentence.", 0, 25)
-        assert input_sents[1] == ("Another test sentence with similarity.", 25, 63)
+        assert input_sents[0] == ("This is a test sentence. ", 0, 24)
+        assert input_sents[1] == ("Another test sentence with similarity.", 25, 62)
         assert len(ref_doc_sents) == 2
 
         assert ref_doc_sents["doc1.txt"][0] == (
-            "This is a test sentence with words.",
+            "This is a test sentence with words. ",
             0,
-            36,
+            35,
         )
         assert ref_doc_sents["doc1.txt"][1] == (
             "Something completely different.",
             36,
-            67,
+            66,
         )
         assert ref_doc_sents["doc2.txt"][0] == (
             "Another test sentence with similarity and more words.",
             0,
-            53,
+            52,
         )
 
     def test_min_length_filter(self, sample_texts):
@@ -136,6 +228,10 @@ class TestCrossCheckSentences:
                 "reference_sentence",
                 "reference_document",
                 "similarity_score",
+                "input_start_pos",
+                "input_end_pos",
+                "reference_start_pos",
+                "reference_end_pos",
             ]
         )
 
@@ -220,14 +316,14 @@ class TestCheckFunction:
 
         with patch("builtins.open", side_effect=mock_file_open):
             with patch("json.dump") as mock_json_dump:
-                with patch("builtins.print") as mock_print:
-                    check(input_file, ref_files, 0.5, "results.json")
+                # with patch("builtins.print") as mock_print:
+                check(input_file, ref_files, 0.5, "results.json")
 
-                    # Check that json.dump was called
-                    mock_json_dump.assert_called_once()
-                    # Get the results from the first arg of json.dump
-                    results = mock_json_dump.call_args[0][0]
-                    assert len(results) >= 1
+                # Check that json.dump was called
+                mock_json_dump.assert_called_once()
+                # Get the results from the first arg of json.dump
+                results = mock_json_dump.call_args[0][0]
+                assert len(results) >= 1
 
     def test_min_length_filter_in_check(self):
         """Test that the min_length parameter works in the check function."""
@@ -289,6 +385,39 @@ class TestCheckFunction:
                 check(input_file, ref_files, 0.5, output_file=None, quiet=True)
                 mock_json.assert_not_called()
 
+    def test_positions_in_results(self, sample_texts):
+        """Test that positions are correctly maintained in results."""
+        input_doc, ref_docs = sample_texts
+        input_sents, ref_doc_sents = _split_texts_to_sentences(input_doc, ref_docs, 0)
+        results = []
+
+        with patch("builtins.print"):
+            _cross_check_sentences(input_sents, ref_doc_sents, results, 0.5, quiet=True)
+
+        # Check positions are preserved in results
+        for result in results:
+            assert "input_start_pos" in result
+            assert "input_end_pos" in result
+            assert "reference_start_pos" in result
+            assert "reference_end_pos" in result
+
+            # Verify positions make sense
+            assert 0 <= result["input_start_pos"] < result["input_end_pos"] + 1
+            assert 0 <= result["reference_start_pos"] < result["reference_end_pos"] + 1
+
+            # Verify that positions actually correspond to the sentences
+            assert (
+                input_doc[result["input_start_pos"] : result["input_end_pos"] + 1]
+                == result["input_sentence"]
+            )
+            doc_name = result["reference_document"]
+            assert (
+                ref_docs[doc_name][
+                    result["reference_start_pos"] : result["reference_end_pos"] + 1
+                ]
+                == result["reference_sentence"]
+            )
+
 
 def test_check():
     check(
@@ -298,3 +427,44 @@ def test_check():
         output_file="results.json",
         quiet=False,
     )
+
+
+class TestCLI:
+    @patch("sys.argv", ["visualizer.py", "document.md", "reference1.txt"])
+    def test_default_output_filenames(self):
+        """Test that default output filenames are inferred correctly."""
+        args = get_inputs()
+        assert args.output == "document.json"
+        assert args.text_output == "document.html"
+
+    @patch(
+        "sys.argv",
+        [
+            "visualizer.py",
+            "document.md",
+            "reference1.txt",
+            "--output",
+            "custom.json",
+        ],
+    )
+    def test_custom_output_filename(self):
+        """Test that custom output filename overrides the default."""
+        args = get_inputs()
+        assert args.output == "custom.json"
+        assert args.text_output == "document.html"
+
+    @patch(
+        "sys.argv",
+        [
+            "visualizer.py",
+            "document.md",
+            "reference1.txt",
+            "--text_output",
+            "custom.html",
+        ],
+    )
+    def test_custom_text_output_filename(self):
+        """Test that custom text output filename overrides the default."""
+        args = get_inputs()
+        assert args.output == "document.json"
+        assert args.text_output == "custom.html"
