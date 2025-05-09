@@ -116,11 +116,7 @@ class TestVisualizationRendering:
                 with patch("shutil.copy"):
                     # Generate the final HTML
                     final_html = generate_final_html(
-                        html_content,
-                        doc_colors,
-                        matches,
-                        "test_input.md",
-                        "test_output.html",
+                        html_content, doc_colors, matches, "test_input.md"
                     )
 
                     # Verify the final HTML structure

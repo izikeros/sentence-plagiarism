@@ -68,7 +68,7 @@ def main() -> None:
 
     # Generate the final HTML with CSS and JavaScript
     final_html = generate_final_html(
-        html_with_highlights, doc_colors, plagiarism_matches, args.input, args.output
+        html_with_highlights, doc_colors, plagiarism_matches, args.input
     )
 
     # Save the final HTML file
