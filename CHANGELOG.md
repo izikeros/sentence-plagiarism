@@ -2,11 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [0.7.3] - 2025-05-09
 
 ### ⚙️ Miscellaneous Tasks
 
 - Update CHANGELOG for version 0.7.2 with new features, bug fixes, and refactoring details
+- Update CHANGELOG
+- Add default configuration file for git-cliff
+- Bump version to 0.7.3 in pyproject.toml
 
 ## [0.7.2] - 2025-05-09
 
