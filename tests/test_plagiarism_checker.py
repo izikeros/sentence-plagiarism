@@ -316,14 +316,14 @@ class TestCheckFunction:
 
         with patch("builtins.open", side_effect=mock_file_open):
             with patch("json.dump") as mock_json_dump:
-                with patch("builtins.print") as mock_print:
-                    check(input_file, ref_files, 0.5, "results.json")
+                # with patch("builtins.print") as mock_print:
+                check(input_file, ref_files, 0.5, "results.json")
 
-                    # Check that json.dump was called
-                    mock_json_dump.assert_called_once()
-                    # Get the results from the first arg of json.dump
-                    results = mock_json_dump.call_args[0][0]
-                    assert len(results) >= 1
+                # Check that json.dump was called
+                mock_json_dump.assert_called_once()
+                # Get the results from the first arg of json.dump
+                results = mock_json_dump.call_args[0][0]
+                assert len(results) >= 1
 
     def test_min_length_filter_in_check(self):
         """Test that the min_length parameter works in the check function."""
