@@ -94,9 +94,8 @@ def split_text_into_segments(
         if pos_type == "start":
             if match not in active_matches:  # Avoid duplicates
                 active_matches.append(match)
-        elif pos_type == "end":
-            if match in active_matches:
-                active_matches.remove(match)
+        elif pos_type == "end" and match in active_matches:
+            active_matches.remove(match)
 
         current_pos = pos
 
