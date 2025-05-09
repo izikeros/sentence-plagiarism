@@ -28,8 +28,8 @@ def create_html_with_highlights_md(
     # TODO: the number of segments is not equal to the number of matches - it is greater - why?
     # Generate HTML with appropriate divs for highlights
     html_content = ""
-    num_segments = len(segments)
-    for idx, segment in enumerate(segments):
+    # num_segments = len(segments)
+    for _idx, segment in enumerate(segments):
         txt = segment.text
         if not segment.matches:
             # Regular text, no plagiarism
@@ -51,9 +51,9 @@ def create_html_with_highlights_md(
 
             # Average similarity for overlapping segments
             avg_similarity = similarity_sum / num_matches
-            opacity = min(
-                0.3 + avg_similarity * 0.7, 1.0
-            )  # Scale opacity based on similarity
+            # opacity = min(
+            #     0.3 + avg_similarity * 0.7, 1.0
+            # )  # Scale opacity based on similarity
 
             # Build data attributes for tooltip
             data_attrs = {
@@ -104,7 +104,7 @@ def generate_legend_items(doc_colors: dict[str, str]) -> str:
     """Generate HTML for legend items."""
     items = ""
     for doc, color in doc_colors.items():
-        doc_id = re.sub(r"[^a-zA-Z0-9]", "_", doc)
+        # doc_id = re.sub(r"[^a-zA-Z0-9]", "_", doc)
         doc_name = Path(doc).name
         items += f'<div class="legend-item"><span class="color-box" style="background-color: {color};"></span>{doc_name}</div>'
     return items
@@ -132,9 +132,6 @@ def generate_final_html(
 
     # Get template directory path
     template_dir = Path(__file__).parent / "templates"
-
-    # Get input filename for title
-    input_filename = Path(input_file).name
 
     # Read HTML template
     # Read the HTML template
@@ -165,7 +162,7 @@ def generate_final_html(
         content=html_content,
     )
 
-    # Create output directory if it doesn't exist
+    # Create an output directory if it doesn't exist
     output_dir = Path(output_path).parent
     output_dir.mkdir(parents=True, exist_ok=True)
 
