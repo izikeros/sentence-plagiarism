@@ -2,6 +2,75 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.2] - 2025-05-09
+
+### 🚀 Features
+
+- Add TODOs for future enhancements in plagiarism visualizer
+- Refactor PlagiarismMatch to use dataclass and add validation checks
+- Add test function to process files and generate visualization
+- Update dependencies and add new testing tools
+- Set default output filenames based on input file if not provided.
+- Implement text cleaning and segmentation for plagiarism detection
+- Inline CSS and JS in HTML report generation, removing file copy
+- Inline CSS and JS in plagiarism report template, removing external file references
+- Add functionality to generate standalone HTML report with inlined CSS and JS
+- Add logging for input and reference validation in PlagiarismMatch
+- Enhance logging for match positions in text processing
+- Add example usage and visualization for plagiarism detection
+
+### 🐛 Bug Fixes
+
+- Enhance sentence extraction by trimming trailing whitespace
+- Change active_matches from set to list and prevent duplicates
+- Change the way how the sentences are extracted.
+- Update import paths in README for visualization modules
+- Correct segment boundaries in text processing tests
+
+### 💼 Other
+
+- Update dev dependencies in pyproject.toml
+
+### 🚜 Refactor
+
+- Refactor HTML generation and add new utility functions
+- Plagiarism visualizer into modular structure
+- HTML generator by removing unused variables
+- Move test class to a separate file
+- Simplified the conditional logic
+- Move output dir creation
+- Remove unused output parameter from HTML generation
+
+### 📚 Documentation
+
+- Add comments
+- Add comments to clarify sentence splitting in _split_texts_to_sentences
+- Polish comments and improve code readability
+- Update README with revised usage examples and visualization steps
+
+### 🎨 Styling
+
+- Format
+
+### 🧪 Testing
+
+- Add unit tests for split_text_into_segments function
+- Refactor and expand tests for sentence splitting logic.
+- Refactor and expand tests for plagiarism visualizer.
+- Add tests for CLI input handling and output filename inference
+- Remove unused print mock in plagiarism checker test
+
+### ⚙️ Miscellaneous Tasks
+
+- Update changelog for version 0.7.1
+- Move the function to the end
+- Minor edits
+- Remove unnecessary blank line in sentence extraction
+- Update version to 0.7.2 and adjust Python dependency range
+- Update .gitignore to include output, scripts, and docs directories
+- Add SIM117 to ignore list in ruff configuration
+- Add pytest configuration file for standardized test setup
+
 ## [0.7.1] - 2025-05-07
 
 ### 🐛 Bug Fixes
