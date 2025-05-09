@@ -77,12 +77,12 @@ class TestSplitTextIntoSegments:
 
         # Check first segment (clean text)
         assert result[0].start == 0
-        assert result[0].end == 33
+        assert result[0].end == 34
         assert result[0].text == "This is a test document with some "
         assert result[0].matches == []
 
         # Check second segment (plagiarized)
-        assert result[1].start == 44
+        assert result[1].start == 34
         assert result[1].end == 53
         assert result[1].text == "plagiarized content "
         assert len(result[1].matches) == 1
