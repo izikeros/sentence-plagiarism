@@ -74,4 +74,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         activeBtn.classList.add('active');
     }
+
+    const highlightedBlocks = document.querySelectorAll('.plagiarized');
+    let currentHighlightIndex = -1;
+
+    function navigateHighlights(direction) {
+        const visibleHighlights = Array.from(highlightedBlocks).filter(el => !el.classList.contains('hidden'));
+        if (visibleHighlights.length === 0) return;
+
+        // Update the current index
+        currentHighlightIndex += direction;
+        if (currentHighlightIndex < 0) currentHighlightIndex = visibleHighlights.length - 1;
+        if (currentHighlightIndex >= visibleHighlights.length) currentHighlightIndex = 0;
+
+        // Scroll to the current highlighted block
+        const target = visibleHighlights[currentHighlightIndex];
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Optionally, add a temporary highlight effect
+        target.classList.add('active-highlight');
+        setTimeout(() => target.classList.remove('active-highlight'), 1000);
+    }
+
+    // Add event listeners for navigation buttons
+    document.getElementById('prev-highlight-btn').addEventListener('click', () => navigateHighlights(-1));
+    document.getElementById('next-highlight-btn').addEventListener('click', () => navigateHighlights(1));
 });
