@@ -47,6 +47,39 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def visualize_plagiarism(
+    input_file: str, plagiarism_data_file: str, output_file: str
+) -> None:
+    """Programmatically generate HTML visualization of plagiarism in Markdown documents.
+
+    Args:
+        input_file: Path to input Markdown file
+        plagiarism_data_file: Path to JSON file with plagiarism data
+        output_file: Path for output HTML file
+    """
+    # Load and process input files
+    markdown_content, plagiarism_matches = load_files(input_file, plagiarism_data_file)
+
+    # Generate colors for each reference document
+    doc_colors = generate_document_colors(plagiarism_matches)
+
+    # Create HTML with plagiarism highlights
+    html_with_highlights = create_html_with_highlights_md(
+        markdown_content, plagiarism_matches, doc_colors
+    )
+
+    # Cleanup output - remove ****
+    html_with_highlights = re.sub(r"\*\*\*\*", "", html_with_highlights)
+
+    # Generate the final HTML with CSS and JavaScript
+    final_html = generate_final_html(
+        html_with_highlights, doc_colors, plagiarism_matches, input_file
+    )
+
+    # Save the final HTML file
+    save_html(final_html, output_file)
+
+
 def main() -> None:
     """Main function to process files and generate visualization."""
     args = parse_arguments()
