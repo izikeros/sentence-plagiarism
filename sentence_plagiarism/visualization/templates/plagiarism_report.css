@@ -107,3 +107,27 @@ pre, code {
 .slider-value {
     font-weight: bold;
 }
+
+.active-highlight {
+    outline: 3px solid #FFD700; /* Gold outline for active highlight */
+    transition: outline 0.3s ease-in-out;
+}
+
+.navigation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.navigation-buttons button {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    background: #f5f5f5;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.navigation-buttons button:hover {
+    background: #ddd;
+}
