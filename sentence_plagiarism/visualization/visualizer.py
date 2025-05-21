@@ -46,7 +46,10 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--output", required=True, help="Output HTML file")
     return parser.parse_args()
 
-def visualize_plagiarism(input_file: str, plagiarism_data_file: str, output_file: str) -> None:
+
+def visualize_plagiarism(
+    input_file: str, plagiarism_data_file: str, output_file: str
+) -> None:
     """Programmatically generate HTML visualization of plagiarism in Markdown documents.
 
     Args:
@@ -75,6 +78,7 @@ def visualize_plagiarism(input_file: str, plagiarism_data_file: str, output_file
 
     # Save the final HTML file
     save_html(final_html, output_file)
+
 
 def main() -> None:
     """Main function to process files and generate visualization."""
