@@ -16,6 +16,14 @@
     <div class="controls">
         <h2>{subtitle}</h2>
         <p>{subsubtitle}</p>
+        <div class="slider-container">
+            <label for="similarity-slider">Similarity Threshold:</label>
+            <input type="range" id="similarity-slider" min="0" max="100" value="50" step="1">
+            <span id="slider-value">50%</span>
+        </div>
+        <div id="highlighted-count" style="font-weight: bold; margin-bottom: 10px;">
+            Highlighted Sentences: 0
+        </div>
         <div class="buttons">
             {filter_buttons}
         </div>
