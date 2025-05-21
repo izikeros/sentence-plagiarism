@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.7.4] - 2025-05-21
+
+### 🚀 Features
+
+- Add similarity slider to filter and highlight sentences
+- Add navigation for highlighted plagiarism sections
+- Add function to visualize plagiarism in Markdown documents
+
+### ⚙️ Miscellaneous Tasks
+
+- Update CHANGELOG for version 0.7.3 with recent changes and tasks
+- Bump version to 0.7.4
+
 ## [0.7.3] - 2025-05-09
 
 ### ⚙️ Miscellaneous Tasks
