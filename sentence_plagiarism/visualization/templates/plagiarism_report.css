@@ -88,3 +88,22 @@ pre, code {
     padding: 10px;
     overflow-x: auto;
 }
+
+.slider-container {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.slider-container label {
+    font-weight: bold;
+}
+
+.slider-container input[type="range"] {
+    width: 200px;
+}
+
+.slider-value {
+    font-weight: bold;
+}
