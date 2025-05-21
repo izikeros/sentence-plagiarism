@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - 2025-05-21
+
+### 🐛 Bug Fixes
+
+- Convert reference_document to string in plagiarism results
+
 ## [0.7.4] - 2025-05-21
 
 ### 🚀 Features
