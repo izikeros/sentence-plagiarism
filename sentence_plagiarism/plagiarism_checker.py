@@ -199,6 +199,11 @@ def check(
         similarity_metric,
     )
 
+    # loop over all the results and in each result item convert value under 'reference_document' from
+    # path to string
+    for result in results:
+        result["reference_document"] = str(result["reference_document"])
+
     # Output to JSON file if specified
     if output_file:
         with open(output_file, "w", encoding="utf-8") as f:
